@@ -1,0 +1,8 @@
+
+.idea/
+
+.venv/
+modules/article-ingest/data/
+modules/article-ingest/.coverage
+__pycache__/
+*.egg-info/
