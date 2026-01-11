@@ -44,6 +44,46 @@ List items (optionally filter by source):
 article-ingest items --source lobsters
 ```
 
+Search items by title/author/url:
+
+```bash
+article-ingest items --query "memory leak"
+```
+
+Filter by publish date:
+
+```bash
+article-ingest items --after 2026-01-01
+article-ingest items --since "7 days ago"
+article-ingest items --since "24 hours ago"
+```
+
+Show extra metadata/snippets:
+
+```bash
+article-ingest items --verbose
+```
+
+JSON output for scripting:
+
+```bash
+article-ingest items --json
+article-ingest item content <item_id> --json
+```
+
+Show item metadata (defaults to `show`):
+
+```bash
+article-ingest item <item_id>
+```
+
+Fetch multiple items in one command:
+
+```bash
+article-ingest item show 1 2 3
+article-ingest item content 1 2 3
+```
+
 Show comments for an item (if available):
 
 ```bash

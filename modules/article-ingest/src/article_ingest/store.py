@@ -23,12 +23,10 @@ class Store:
             self._conn.row_factory = sqlite3.Row
             self._conn.execute("PRAGMA foreign_keys = ON")
         return self._conn
-
     def close(self) -> None:
         if self._conn is not None:
             self._conn.close()
             self._conn = None
-
     def init_db(self) -> None:
         conn = self.connect()
         conn.executescript(
@@ -47,7 +45,6 @@ class Store:
                 last_success_at TEXT,
                 last_error TEXT
             );
-
             CREATE TABLE IF NOT EXISTS items (
                 id INTEGER PRIMARY KEY,
                 source_id INTEGER NOT NULL,
@@ -62,7 +59,6 @@ class Store:
                 latest_version_id INTEGER,
                 UNIQUE(source_id, item_key)
             );
-
             CREATE TABLE IF NOT EXISTS item_versions (
                 id INTEGER PRIMARY KEY,
                 item_id INTEGER NOT NULL,
@@ -76,7 +72,6 @@ class Store:
                 word_count INTEGER,
                 UNIQUE(item_id, content_hash)
             );
-
             CREATE TABLE IF NOT EXISTS runs (
                 id INTEGER PRIMARY KEY,
                 started_at TEXT NOT NULL,
@@ -88,7 +83,6 @@ class Store:
                 errors_count INTEGER NOT NULL DEFAULT 0,
                 notes TEXT
             );
-
             CREATE TABLE IF NOT EXISTS run_errors (
                 id INTEGER PRIMARY KEY,
                 run_id INTEGER NOT NULL,
@@ -102,7 +96,6 @@ class Store:
                 input_path TEXT,
                 occurred_at TEXT NOT NULL
             );
-
             CREATE TABLE IF NOT EXISTS assets (
                 id INTEGER PRIMARY KEY,
                 item_version_id INTEGER NOT NULL,
@@ -113,7 +106,6 @@ class Store:
                 size INTEGER,
                 sha256 TEXT
             );
-
             CREATE INDEX IF NOT EXISTS idx_items_source_key ON items(source_id, item_key);
             CREATE INDEX IF NOT EXISTS idx_item_versions_run ON item_versions(run_id);
             CREATE INDEX IF NOT EXISTS idx_items_last_seen_run ON items(last_seen_run_id);
@@ -121,19 +113,16 @@ class Store:
             """
         )
         conn.commit()
-
     def _fetchone(self, query: str, params: Iterable[Any]) -> sqlite3.Row | None:
         cur = self.connect().execute(query, params)
         row = cur.fetchone()
         cur.close()
         return row
-
     def _fetchall(self, query: str, params: Iterable[Any]) -> list[sqlite3.Row]:
         cur = self.connect().execute(query, params)
         rows = cur.fetchall()
         cur.close()
         return rows
-
     def create_run(self, status: str = "running") -> int:
         now = now_utc()
         cur = self.connect().execute(
@@ -142,7 +131,6 @@ class Store:
         )
         self.connect().commit()
         return int(cur.lastrowid)
-
     def finish_run(
         self,
         run_id: int,
@@ -173,7 +161,6 @@ class Store:
             ),
         )
         self.connect().commit()
-
     def record_error(
         self,
         run_id: int,
@@ -207,20 +194,16 @@ class Store:
             ),
         )
         self.connect().commit()
-
     def list_runs(self) -> list[sqlite3.Row]:
         return self._fetchall("SELECT * FROM runs ORDER BY id DESC", ())
-
     def get_latest_run_id(self) -> int | None:
         row = self._fetchone("SELECT id FROM runs ORDER BY id DESC LIMIT 1", ())
         return int(row[0]) if row else None
-
     def get_previous_run_id(self, run_id: int) -> int | None:
         row = self._fetchone(
             "SELECT id FROM runs WHERE id < ? ORDER BY id DESC LIMIT 1", (run_id,)
         )
         return int(row[0]) if row else None
-
     def upsert_source(
         self,
         slug: str,
@@ -272,20 +255,16 @@ class Store:
         )
         conn.commit()
         return int(cur.lastrowid)
-
     def update_source_enabled(self, slug: str, enabled: bool) -> None:
         self.connect().execute(
             "UPDATE sources SET enabled = ?, updated_at = ? WHERE slug = ?",
             (1 if enabled else 0, now_utc(), slug),
         )
         self.connect().commit()
-
     def list_sources(self) -> list[sqlite3.Row]:
         return self._fetchall("SELECT * FROM sources ORDER BY slug ASC", ())
-
     def get_source_by_slug(self, slug: str) -> sqlite3.Row | None:
         return self._fetchone("SELECT * FROM sources WHERE slug = ?", (slug,))
-
     def upsert_item(
         self,
         source_id: int,
@@ -468,7 +447,10 @@ class Store:
         if row is None:
             raise ValueError("Content not found for item/version")
         content_path = self._resolve_content_path(row["content_path"])
-        markdown = content_path.read_text(encoding="utf-8")
+        try:
+            markdown = content_path.read_text(encoding="utf-8")
+        except FileNotFoundError as exc:
+            raise ValueError("Content file not found for item/version") from exc
         return markdown, row
     def read_sidecar(
         self,
@@ -483,14 +465,30 @@ class Store:
         sidecar_path = content_path.parent / filename
         if not sidecar_path.exists():
             raise ValueError("Sidecar file not found")
-        markdown = sidecar_path.read_text(encoding="utf-8")
+        try:
+            markdown = sidecar_path.read_text(encoding="utf-8")
+        except FileNotFoundError as exc:
+            raise ValueError("Sidecar file not found") from exc
         return markdown, row
-    def list_items(self, source_id: int | None = None) -> list[sqlite3.Row]:
-        if source_id is None:
-            return self._fetchall("SELECT * FROM items ORDER BY id DESC", ())
-        return self._fetchall(
-            "SELECT * FROM items WHERE source_id = ? ORDER BY id DESC", (source_id,)
-        )
+    def list_items(
+        self,
+        source_id: int | None = None,
+        query: str | None = None,
+    ) -> list[sqlite3.Row]:
+        conditions: list[str] = []
+        params: list[str | int] = []
+        if source_id is not None:
+            conditions.append("source_id = ?")
+            params.append(source_id)
+        if query:
+            like = f"%{query}%"
+            conditions.append(
+                "(title LIKE ? OR canonical_url LIKE ? OR author LIKE ? OR item_key LIKE ?)"
+            )
+            params.extend([like, like, like, like])
+        where_clause = f" WHERE {' AND '.join(conditions)}" if conditions else ""
+        sql = f"SELECT * FROM items{where_clause} ORDER BY id DESC"
+        return self._fetchall(sql, tuple(params))
     def get_item(self, item_id: int) -> sqlite3.Row | None:
         return self._fetchone("SELECT * FROM items WHERE id = ?", (item_id,))
     def get_item_versions(self, item_id: int) -> list[sqlite3.Row]:
