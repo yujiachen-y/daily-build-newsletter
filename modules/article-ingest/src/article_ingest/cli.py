@@ -198,7 +198,7 @@ def _item_comments_json(store: Store, item_id: int, version_id: int | None) -> d
 
 def cmd_ingest(store: Store, args: argparse.Namespace) -> None:
     ingestor = Ingestor(store)
-    run_id = ingestor.run(source_slugs=args.source)
+    run_id = ingestor.run(source_slugs=args.source, run_type=args.type)
     print(f"ingest complete run_id={run_id}")
 
 
@@ -317,11 +317,20 @@ def cmd_items(store: Store, args: argparse.Namespace) -> None:
 
 def cmd_source(store: Store, args: argparse.Namespace) -> None:
     if args.subcommand == "list":
+        type_filter = args.type or "all"
         sources = store.list_sources()
-        for row in sources:
-            policy = json.loads(row["policy_json"] or "{}")
-            mode = policy.get("mode", "html")
-            print(f"- {row['slug']} enabled={bool(row['enabled'])} mode={mode}")
+        if type_filter in ("all", "content"):
+            for row in sources:
+                policy = json.loads(row["policy_json"] or "{}")
+                mode = policy.get("mode", "html")
+                print(
+                    f"- {row['slug']} enabled={bool(row['enabled'])} mode={mode} type=content"
+                )
+        if type_filter in ("all", "index"):
+            from .index_ingest import list_index_sources
+
+            for source in list_index_sources():
+                print(f"- {source.slug} mode=index type=index (builtin) name={source.name}")
     elif args.subcommand == "add":
         policy = _load_json_arg(args.policy)
         config = _load_json_arg(args.config)
@@ -371,6 +380,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ingest_parser = subparsers.add_parser("ingest")
     ingest_parser.add_argument("--source", action="append")
+    ingest_parser.add_argument("--type", choices=["content", "index", "all"], default="all")
     ingest_parser.set_defaults(func=cmd_ingest)
 
     updates_parser = subparsers.add_parser("updates")
@@ -407,6 +417,7 @@ def build_parser() -> argparse.ArgumentParser:
     source_parser = subparsers.add_parser("source")
     source_sub = source_parser.add_subparsers(dest="subcommand", required=True)
     source_list = source_sub.add_parser("list")
+    source_list.add_argument("--type", choices=["content", "index", "all"], default="all")
     source_list.set_defaults(func=cmd_source)
     source_add = source_sub.add_parser("add")
     source_add.add_argument("slug")

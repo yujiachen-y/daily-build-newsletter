@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from dateutil import parser as dateparser
 
 from ..models import ItemCandidate, Source
+from ..text_processing import detect_blocked_html
 from ..url_slug import normalize_url
 from .base import AdapterError
 
@@ -20,6 +21,9 @@ class HtmlListAdapter:
         if response.status_code >= 400:
             raise AdapterError(f"HTTP {response.status_code}")
         response.encoding = response.apparent_encoding
+        blocked = detect_blocked_html(response.text)
+        if blocked:
+            raise AdapterError(f"Blocked content detected: {blocked}")
         soup = BeautifulSoup(response.text, "lxml")
         item_selector = source.config.get("item_selector")
         if not item_selector:

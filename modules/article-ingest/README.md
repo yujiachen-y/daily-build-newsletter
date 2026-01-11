@@ -133,6 +133,43 @@ article-ingest source list
 
 - `concurrency`: number of parallel detail/comment fetches per source (default `1`). If you want faster runs, raise this and consider adjusting `max_rpm`.
 
+### Index mode (aggregations)
+
+`article-ingest` includes a built-in index mode for aggregation sources. This mode skips item/version storage and instead writes daily Markdown summaries.
+
+Built-in index sources:
+- `hn`
+- `lobsters`
+- `releasebot`
+- `hf-papers`
+- `github-trending`
+- `product-hunt-rss`
+
+Run index-only ingest:
+
+```bash
+article-ingest ingest --type index
+```
+
+Run both content + index (default):
+
+```bash
+article-ingest ingest
+```
+
+Index output path:
+
+```
+data/daily/{source_slug}/YYYY-MM-DD.md
+```
+
+List sources by type:
+
+```bash
+article-ingest source list --type index
+article-ingest source list --type content
+```
+
 ### Comment sites (HN/Lobsters)
 
 Use adapter modes `"hn"` or `"lobsters"` and set a top-comment limit:

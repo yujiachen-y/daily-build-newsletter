@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import time
+from datetime import datetime, timedelta, timezone
+
 import pytest
 
 from article_ingest.ingest import Ingestor
@@ -77,7 +80,7 @@ def test_ingest_creates_version_and_dedup(monkeypatch, tmp_path):
     )
 
     ingestor = Ingestor(store, root=tmp_path)
-    run_id = ingestor.run()
+    run_id = ingestor.run(run_type="content")
     items = store.list_items()
     assert len(items) == 1
     item_id = int(items[0]["id"])
@@ -86,7 +89,7 @@ def test_ingest_creates_version_and_dedup(monkeypatch, tmp_path):
     updates = store.get_updates_for_run(run_id)
     assert len(updates) == 1
 
-    run_id2 = ingestor.run()
+    run_id2 = ingestor.run(run_type="content")
     versions_after = store.get_item_versions(item_id)
     assert len(versions_after) == 1
     updates_after = store.get_updates_for_run(run_id2)
@@ -110,7 +113,7 @@ def test_ingest_records_error_on_detail_failure(monkeypatch, tmp_path):
     monkeypatch.setattr("article_ingest.ingest.adapter_for_mode", lambda mode: adapter)
 
     ingestor = Ingestor(store, root=tmp_path)
-    ingestor.run()
+    ingestor.run(run_type="content")
 
     items = store.list_items()
     assert len(items) == 1
@@ -151,7 +154,7 @@ def test_ingest_writes_comments_sidecar(monkeypatch, tmp_path):
     )
 
     ingestor = Ingestor(store, root=tmp_path)
-    ingestor.run()
+    ingestor.run(run_type="content")
 
     items = store.list_items()
     assert len(items) == 1
@@ -181,7 +184,7 @@ def test_ingest_detects_blocked_content(monkeypatch, tmp_path):
     )
 
     ingestor = Ingestor(store, root=tmp_path)
-    ingestor.run()
+    ingestor.run(run_type="content")
 
     items = store.list_items()
     assert len(items) == 1
@@ -203,8 +206,49 @@ def test_ingest_marks_failed_on_interrupt(monkeypatch, tmp_path):
     monkeypatch.setattr(ingestor, "_load_sources", _raise_interrupt)
 
     with pytest.raises(KeyboardInterrupt):
-        ingestor.run()
+        ingestor.run(run_type="content")
 
     row = store.connect().execute("SELECT status FROM runs ORDER BY id DESC").fetchone()
     assert row is not None
     assert row["status"] == "failed"
+
+
+def test_ingest_cleans_stale_runs(monkeypatch, tmp_path):
+    store = Store(root=tmp_path)
+    stale_run_id = store.create_run()
+    old = datetime.now(timezone.utc) - timedelta(hours=2)
+    store.connect().execute(
+        "UPDATE runs SET started_at = ?, status = ? WHERE id = ?",
+        (old.isoformat(), "running", stale_run_id),
+    )
+    store.connect().commit()
+
+    ingestor = Ingestor(store, root=tmp_path)
+    monkeypatch.setattr(ingestor, "_load_sources", lambda _: [])
+    run_id = ingestor.run(run_type="content")
+    assert run_id != stale_run_id
+
+    row = store.connect().execute(
+        "SELECT status, notes FROM runs WHERE id = ?", (stale_run_id,)
+    ).fetchone()
+    assert row is not None
+    assert row["status"] == "failed"
+    assert "stale_run_cleanup" in (row["notes"] or "")
+
+
+def test_ingest_logs_start_finish_and_heartbeat(monkeypatch, tmp_path):
+    store = Store(root=tmp_path)
+    ingestor = Ingestor(store, root=tmp_path)
+    monkeypatch.setattr("article_ingest.ingest.HEARTBEAT_SECONDS", 0.01)
+
+    def _slow_sources(_):
+        time.sleep(0.03)
+        return []
+
+    monkeypatch.setattr(ingestor, "_load_sources", _slow_sources)
+    run_id = ingestor.run(run_type="content")
+    log_path = tmp_path / "logs" / f"run-{run_id}.log"
+    contents = log_path.read_text(encoding="utf-8")
+    assert "run started" in contents
+    assert "run finished" in contents
+    assert "heartbeat" in contents

@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 import requests
 
 from .adapters import AdapterError, adapter_for_mode
+from .index_ingest import index_slugs, run_index_source
 from .ingest_fetch import FetchJob, FetchOutcome, Throttle, build_session, fetch_candidate
+from .ingest_runtime import RunSignalHandler, start_heartbeat, stop_heartbeat
 from .models import ItemCandidate, Source, SourcePolicy
 from .run_logger import RunLogger
 from .storage import download_assets, write_markdown
@@ -16,7 +19,9 @@ from .store import Store
 from .text_processing import hash_content
 from .timestamps import now_utc
 
-
+STALE_RUN_SECONDS = 60 * 60
+HEARTBEAT_SECONDS = 60.0
+SOURCE_CONCURRENCY_LIMIT = 8
 @dataclass
 class RunStats:
     total_items: int = 0
@@ -46,24 +51,41 @@ class Ingestor:
         self.store = store
         self.root = store.root if root is None else root
 
-    def run(self, source_slugs: list[str] | None = None) -> int:
+    def run(self, source_slugs: list[str] | None = None, run_type: str = "all") -> int:
         run_id = self.store.create_run()
         logger = RunLogger(self.root, run_id)
+        logger.log("run started")
+        stop_event, heartbeat_thread = start_heartbeat(logger, HEARTBEAT_SECONDS)
         stats = RunStats()
         status = "success"
+        signal_handler = RunSignalHandler(logger)
         try:
-            sources = self._load_sources(source_slugs)
-            for source in sources:
-                self._process_source(source, run_id, logger, stats)
+            with signal_handler:
+                self._cleanup_stale_runs(logger)
+                self._validate_slug_overlap()
+                sources: list[Source] = []
+                if run_type in ("all", "content"):
+                    sources = self._load_sources(source_slugs)
+                if sources:
+                    self._process_sources(sources, run_id, logger, stats)
+                if run_type in ("all", "index"):
+                    self._run_index_sources(source_slugs, logger)
         except KeyboardInterrupt:
             status = "failed"
-            logger.log("run interrupted")
+            if not signal_handler.interrupted:
+                logger.log("run interrupted")
             raise
         except BaseException as exc:
             status = "failed"
             logger.log(f"run error={exc}")
             raise
         finally:
+            stop_heartbeat(stop_event, heartbeat_thread)
+            logger.log(
+                f"run finished status={status} total_items={stats.total_items} "
+                f"new_items={stats.new_items} updated_items={stats.updated_items} "
+                f"errors={stats.errors_count}"
+            )
             self.store.finish_run(
                 run_id,
                 status=status,
@@ -73,7 +95,61 @@ class Ingestor:
                 errors_count=stats.errors_count,
             )
         return run_id
-
+    def _cleanup_stale_runs(self, logger: RunLogger) -> None:
+        cutoff = datetime.now(timezone.utc) - timedelta(seconds=STALE_RUN_SECONDS)
+        stale_run_ids = self.store.cleanup_stale_runs(cutoff.isoformat())
+        if stale_run_ids:
+            logger.log(
+                f"stale_runs_marked_failed count={len(stale_run_ids)} ids={stale_run_ids}"
+            )
+    def _process_sources(
+        self,
+        sources: list[Source],
+        run_id: int,
+        logger: RunLogger,
+        stats: RunStats,
+    ) -> None:
+        if len(sources) <= 1:
+            for source in sources:
+                self._process_source(source, run_id, logger, stats)
+            return
+        max_workers = min(SOURCE_CONCURRENCY_LIMIT, len(sources))
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(self._process_source_thread, source, run_id, logger)
+                for source in sources
+            ]
+            for future in as_completed(futures):
+                self._merge_stats(stats, future.result())
+    def _process_source_thread(
+        self,
+        source: Source,
+        run_id: int,
+        logger: RunLogger,
+    ) -> RunStats:
+        local_stats = RunStats()
+        thread_store = Store(root=self.root)
+        thread_ingestor = Ingestor(thread_store, root=self.root)
+        thread_ingestor._process_source(source, run_id, logger, local_stats)
+        thread_store.close()
+        return local_stats
+    def _merge_stats(self, target: RunStats, delta: RunStats) -> None:
+        target.total_items += delta.total_items
+        target.new_items += delta.new_items
+        target.updated_items += delta.updated_items
+        target.errors_count += delta.errors_count
+    def _validate_slug_overlap(self) -> None:
+        registry = {row["slug"] for row in self.store.list_sources()}
+        overlap = registry.intersection(set(index_slugs()))
+        if overlap:
+            raise ValueError(f"Index allowlist overlaps source registry: {sorted(overlap)}")
+    def _run_index_sources(self, source_slugs: list[str] | None, logger: RunLogger) -> None:
+        allowlist = index_slugs()
+        if source_slugs is not None:
+            allowlist = [slug for slug in allowlist if slug in source_slugs]
+        for slug in allowlist:
+            run_index_source(self.root, logger, slug)
     def _record_error(
         self,
         run_id: int,

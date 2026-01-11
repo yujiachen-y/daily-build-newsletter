@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 from article_ingest.extract import extract_markdown
-from article_ingest.text_processing import detect_blocked_text, hash_content, normalize_markdown
+from article_ingest.text_processing import (
+    detect_blocked_html,
+    detect_blocked_text,
+    hash_content,
+    normalize_markdown,
+)
 
 
 def test_normalize_markdown_trims_whitespace():
@@ -45,3 +50,12 @@ def test_extract_markdown_strips_scripts():
     markdown = extract_markdown(html)
     assert "Title" in markdown
     assert "Hello" in markdown
+
+
+def test_detect_blocked_html_cloudflare():
+    html = (
+        "<html><head><title>Just a moment...</title></head>"
+        "<body><script src=\"/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1\"></script>"
+        "</body></html>"
+    )
+    assert detect_blocked_html(html) is not None

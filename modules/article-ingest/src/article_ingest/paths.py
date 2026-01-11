@@ -13,6 +13,8 @@ def data_root(root_override: Path | None = None) -> Path:
 
 def ensure_data_dirs(root: Path) -> None:
     (root / "content").mkdir(parents=True, exist_ok=True)
+    (root / "daily").mkdir(parents=True, exist_ok=True)
+    (root / "index").mkdir(parents=True, exist_ok=True)
     (root / "logs").mkdir(parents=True, exist_ok=True)
     (root / "failures").mkdir(parents=True, exist_ok=True)
     (root / "inbox").mkdir(parents=True, exist_ok=True)

@@ -6,10 +6,11 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .paths import data_root, ensure_data_dirs
+from .store_runs import RunStoreMixin
 from .timestamps import now_utc
 
 
-class Store:
+class Store(RunStoreMixin):
     def __init__(self, root: Path | None = None) -> None:
         self.root = data_root(root)
         ensure_data_dirs(self.root)
@@ -123,87 +124,6 @@ class Store:
         rows = cur.fetchall()
         cur.close()
         return rows
-    def create_run(self, status: str = "running") -> int:
-        now = now_utc()
-        cur = self.connect().execute(
-            "INSERT INTO runs (started_at, status) VALUES (?, ?)",
-            (now, status),
-        )
-        self.connect().commit()
-        return int(cur.lastrowid)
-    def finish_run(
-        self,
-        run_id: int,
-        status: str,
-        total_items: int,
-        new_items: int,
-        updated_items: int,
-        errors_count: int,
-        notes: str | None = None,
-    ) -> None:
-        finished = now_utc()
-        self.connect().execute(
-            """
-            UPDATE runs
-            SET finished_at = ?, status = ?, total_items = ?, new_items = ?,
-                updated_items = ?, errors_count = ?, notes = ?
-            WHERE id = ?
-            """,
-            (
-                finished,
-                status,
-                total_items,
-                new_items,
-                updated_items,
-                errors_count,
-                notes,
-                run_id,
-            ),
-        )
-        self.connect().commit()
-    def record_error(
-        self,
-        run_id: int,
-        source_id: int | None,
-        url: str | None,
-        stage: str,
-        http_status: int | None,
-        error_code: str | None,
-        message: str | None,
-        retriable: bool = True,
-        input_path: str | None = None,
-    ) -> None:
-        self.connect().execute(
-            """
-            INSERT INTO run_errors
-            (run_id, source_id, url, stage, http_status, error_code, message,
-             retriable, input_path, occurred_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                run_id,
-                source_id,
-                url,
-                stage,
-                http_status,
-                error_code,
-                message,
-                1 if retriable else 0,
-                input_path,
-                now_utc(),
-            ),
-        )
-        self.connect().commit()
-    def list_runs(self) -> list[sqlite3.Row]:
-        return self._fetchall("SELECT * FROM runs ORDER BY id DESC", ())
-    def get_latest_run_id(self) -> int | None:
-        row = self._fetchone("SELECT id FROM runs ORDER BY id DESC LIMIT 1", ())
-        return int(row[0]) if row else None
-    def get_previous_run_id(self, run_id: int) -> int | None:
-        row = self._fetchone(
-            "SELECT id FROM runs WHERE id < ? ORDER BY id DESC LIMIT 1", (run_id,)
-        )
-        return int(row[0]) if row else None
     def upsert_source(
         self,
         slug: str,
@@ -415,18 +335,6 @@ class Store:
         )
         self.connect().execute("DELETE FROM item_versions WHERE id = ?", (version_id,))
         self.connect().commit()
-    def get_updates_for_run(self, run_id: int) -> list[sqlite3.Row]:
-        return self._fetchall(
-            """
-            SELECT items.*, item_versions.id as version_id, item_versions.content_hash,
-                   item_versions.extracted_at
-            FROM item_versions
-            JOIN items ON items.id = item_versions.item_id
-            WHERE item_versions.run_id = ?
-            ORDER BY item_versions.id DESC
-            """,
-            (run_id,),
-        )
     def _get_version_row(self, item_id: int, version_id: int | None) -> sqlite3.Row | None:
         if version_id is None:
             return self._fetchone(

@@ -108,7 +108,7 @@ def test_rss_adapter_discovers(monkeypatch):
         }
     ]
 
-    def fake_parse(url):
+    def fake_parse(content):
         return SimpleNamespace(entries=entries)
 
     monkeypatch.setattr("article_ingest.adapters.rss.feedparser.parse", fake_parse)
@@ -123,7 +123,15 @@ def test_rss_adapter_discovers(monkeypatch):
         config={"feed_url": "https://example.com/feed"},
     )
     adapter = RssAdapter()
-    candidates = adapter.discover(source, session=None)
+
+    class DummySession:
+        def __init__(self):
+            self.headers = {}
+
+        def get(self, url, timeout=20):
+            return SimpleNamespace(status_code=200, content=b"<xml/>")
+
+    candidates = adapter.discover(source, session=DummySession())
     assert len(candidates) == 1
     assert candidates[0].title == "Post"
 

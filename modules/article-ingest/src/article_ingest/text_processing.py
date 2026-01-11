@@ -13,6 +13,14 @@ _BLOCK_PATTERNS = (
     re.compile(r"verify you are human", re.IGNORECASE),
 )
 
+_BLOCK_HTML_PATTERNS = (
+    re.compile(r"cf-chl", re.IGNORECASE),
+    re.compile(r"/cdn-cgi/challenge-platform", re.IGNORECASE),
+    re.compile(r"just a moment", re.IGNORECASE),
+    re.compile(r"verify you are human", re.IGNORECASE),
+    re.compile(r"enable javascript and cookies to continue", re.IGNORECASE),
+)
+
 
 def normalize_markdown(markdown: str) -> str:
     normalized = markdown.replace("\r\n", "\n").replace("\r", "\n")
@@ -40,6 +48,24 @@ def detect_blocked_text(markdown: str) -> str | None:
             return match.group(0)
     ascii_text = text.encode("ascii", "ignore").decode("ascii")
     for pattern in _BLOCK_PATTERNS:
+        match = pattern.search(ascii_text)
+        if match:
+            return match.group(0)
+    return None
+
+
+def detect_blocked_html(html: str) -> str | None:
+    if not html:
+        return None
+    text = " ".join(html.split())
+    if not text:
+        return None
+    for pattern in _BLOCK_HTML_PATTERNS:
+        match = pattern.search(text)
+        if match:
+            return match.group(0)
+    ascii_text = text.encode("ascii", "ignore").decode("ascii")
+    for pattern in _BLOCK_HTML_PATTERNS:
         match = pattern.search(ascii_text)
         if match:
             return match.group(0)

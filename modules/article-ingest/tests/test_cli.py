@@ -12,7 +12,7 @@ class FakeIngestor:
     def __init__(self, store):
         self.store = store
 
-    def run(self, source_slugs=None):
+    def run(self, source_slugs=None, run_type="all"):
         return 99
 
 

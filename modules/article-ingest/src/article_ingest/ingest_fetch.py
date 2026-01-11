@@ -8,7 +8,7 @@ import requests
 
 from .extract import extract_markdown
 from .models import ItemCandidate, SourcePolicy
-from .text_processing import detect_blocked_text
+from .text_processing import detect_blocked_html, detect_blocked_text
 
 
 class Throttle:
@@ -73,10 +73,17 @@ class FetchOutcome:
     comments_error: ErrorInfo | None = None
 
 
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/120.0 Safari/537.36"
+)
+
+
 def build_session(user_agent: str | None) -> requests.Session:
     session = requests.Session()
-    if user_agent:
-        session.headers["User-Agent"] = user_agent
+    user_agent_value = (user_agent or "").strip() or DEFAULT_USER_AGENT
+    session.headers["User-Agent"] = user_agent_value
     return session
 
 
@@ -101,6 +108,21 @@ def fetch_candidate(
                 stage="detail",
                 code="detail",
                 message=str(exc),
+                url=job.candidate.detail_url,
+            ),
+        )
+
+    blocked_html = detect_blocked_html(html)
+    if blocked_html:
+        return FetchOutcome(
+            job=job,
+            raw_markdown=None,
+            comments_markdown="",
+            comments_count=0,
+            error=ErrorInfo(
+                stage="detail",
+                code="blocked",
+                message=f"Blocked content detected: {blocked_html}",
                 url=job.candidate.detail_url,
             ),
         )

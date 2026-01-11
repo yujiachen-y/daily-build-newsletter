@@ -11,6 +11,8 @@ def yaml_value(value: Any) -> str:
         return str(value)
     if isinstance(value, bool):
         return "true" if value else "false"
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=True)
     return json.dumps(str(value), ensure_ascii=True)
 
 

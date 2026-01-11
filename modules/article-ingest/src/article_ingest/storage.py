@@ -53,7 +53,10 @@ def download_assets(
     assets: list[dict[str, Any]] = []
 
     def replace(match: re.Match) -> str:
-        url = match.group(1).strip()
+        raw = match.group(1).strip()
+        if raw.startswith("<") and raw.endswith(">"):
+            raw = raw[1:-1].strip()
+        url = raw.split()[0] if raw else ""
         resolved = urljoin(base_url, url) if base_url else url
         if not resolved.startswith("http"):
             return match.group(0)
