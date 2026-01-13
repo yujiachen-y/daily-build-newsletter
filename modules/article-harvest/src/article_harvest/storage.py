@@ -35,6 +35,9 @@ class Storage:
     def items_dir(self, source_id: str) -> Path:
         return self.source_root(source_id) / "items"
 
+    def content_path(self, source_id: str, item_id: str) -> Path:
+        return self.items_dir(source_id) / item_id / "content.md"
+
     def runs_dir(self) -> Path:
         return self.data_root / "runs"
 
@@ -118,6 +121,8 @@ class Storage:
                     published_at=item.published_at,
                     author=item.author,
                     extra={},
+                    item_id=item_id,
+                    content_path=str(content_path.relative_to(self.data_root)),
                 )
             )
 
@@ -183,6 +188,8 @@ class Storage:
                     published_at=row.get("published_at"),
                     author=row.get("author"),
                     extra={},
+                    item_id=row.get("id"),
+                    content_path=row.get("content_path"),
                 )
             )
         return records

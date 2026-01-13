@@ -6,5 +6,6 @@ modules/article-ingest/data/
 modules/article-ingest/.coverage
 modules/article-harvest/data/
 modules/article-harvest/.coverage
+editorial_workspace/
 __pycache__/
 *.egg-info/

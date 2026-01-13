@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import pydoc
 import sys
 
 from .ingest import ingest_all, ingest_source
@@ -20,6 +21,11 @@ def main() -> int:
 
     sources_parser = subparsers.add_parser("sources", help="List sources")
     sources_parser.add_argument("--json", action="store_true", help="JSON output")
+
+    read_parser = subparsers.add_parser("read", help="Read stored blog content")
+    read_parser.add_argument("source_id")
+    read_parser.add_argument("item_id")
+    read_parser.add_argument("--pager", action="store_true", help="Display with pager")
 
     sqlite_parser = subparsers.add_parser("sqlite", help="Manage SQLite index")
     sqlite_subparsers = sqlite_parser.add_subparsers(dest="sqlite_command", required=True)
@@ -80,6 +86,22 @@ def main() -> int:
                 print(f"- {source.id} ({source.kind}, {source.method}){suffix}")
         return 0
 
+    if args.command == "read":
+        source = get_source(args.source_id)
+        if source.kind != "blog":
+            print("read is only supported for blog sources", file=sys.stderr)
+            return 2
+        content_path = storage.content_path(args.source_id, args.item_id)
+        if not content_path.exists():
+            print(f"content not found: {content_path}", file=sys.stderr)
+            return 2
+        content = content_path.read_text(encoding="utf-8")
+        if args.pager:
+            pydoc.pager(content)
+        else:
+            sys.stdout.write(content)
+        return 0
+
     if args.command == "sqlite":
         report = rebuild_sqlite_index(storage, list_sources(include_disabled=False))
         if args.json:
@@ -92,7 +114,7 @@ def main() -> int:
         if args.query_command == "source":
             source = get_source(args.source_id)
             records = query_by_source(storage, source, limit=args.limit)
-            _print_records(records, args.json)
+            _print_records(storage, records, args.json)
             return 0
         if args.query_command == "keyword":
             records = query_by_keyword(
@@ -102,7 +124,7 @@ def main() -> int:
                 source_id=args.source,
                 limit=args.limit,
             )
-            _print_records(records, args.json)
+            _print_records(storage, records, args.json)
             return 0
         if args.query_command == "archive":
             records = query_by_archive_date(
@@ -114,19 +136,31 @@ def main() -> int:
                 source_id=args.source,
                 limit=args.limit,
             )
-            _print_records(records, args.json)
+            _print_records(storage, records, args.json)
             return 0
 
     return 1
 
 
-def _print_records(records, as_json: bool) -> None:
+def _print_records(storage: Storage, records, as_json: bool) -> None:
     if as_json:
-        print(json.dumps([record.to_dict() for record in records], ensure_ascii=False, indent=2))
+        payload = []
+        for record in records:
+            data = record.to_dict()
+            data["has_content"] = _has_content(storage, record)
+            payload.append(data)
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
     for record in records:
-        print(f"{record.archived_at} | {record.source_id} | {record.title}")
+        marker = "* " if _has_content(storage, record) else "  "
+        print(f"{marker}{record.archived_at} | {record.source_id} | {record.title}")
         print(f"  {record.url}")
+
+
+def _has_content(storage: Storage, record) -> bool:
+    if not record.content_path:
+        return False
+    return (storage.data_root / record.content_path).exists()
 
 
 if __name__ == "__main__":

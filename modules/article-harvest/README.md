@@ -54,6 +54,8 @@ Query by source:
 article-harvest query source hn
 ```
 
+Items with local content are prefixed with `*` in text output.
+
 Query by keyword:
 
 ```bash
@@ -78,6 +80,14 @@ JSON output (for scripting):
 ```bash
 article-harvest query source hn --json
 ```
+
+Read a stored blog item by id:
+
+```bash
+article-harvest read antirez <item_id>
+```
+
+Use `--json` to retrieve `item_id` and `has_content` flags from queries.
 
 ## Python API
 

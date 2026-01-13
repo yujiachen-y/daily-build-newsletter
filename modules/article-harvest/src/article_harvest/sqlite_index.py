@@ -46,6 +46,8 @@ class SQLiteIndex:
                 published_at TEXT,
                 author TEXT,
                 snapshot_date TEXT,
+                item_id TEXT,
+                content_path TEXT,
                 rank INTEGER,
                 comments_count INTEGER,
                 score INTEGER,
@@ -53,6 +55,7 @@ class SQLiteIndex:
             )
             """
         )
+        _ensure_columns(conn, ["item_id", "content_path"])
         conn.execute("CREATE INDEX IF NOT EXISTS idx_records_source ON records(source_id)")
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_records_archived_date ON records(archived_date)"
@@ -148,11 +151,13 @@ class SQLiteIndex:
                 published_at,
                 author,
                 snapshot_date,
+                item_id,
+                content_path,
                 rank,
                 comments_count,
                 score,
                 extra_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             rows,
         )
@@ -193,6 +198,8 @@ def _row_from_record(record: Record) -> tuple:
         record.published_at,
         record.author,
         record.snapshot_date,
+        record.item_id,
+        record.content_path,
         record.rank,
         record.comments_count,
         record.score,
@@ -213,6 +220,8 @@ def _row_to_record(row: sqlite3.Row) -> Record:
         published_at=row["published_at"],
         author=row["author"],
         snapshot_date=row["snapshot_date"],
+        item_id=row["item_id"],
+        content_path=row["content_path"],
         rank=row["rank"],
         comments_count=row["comments_count"],
         score=row["score"],
@@ -223,3 +232,23 @@ def _row_to_record(row: sqlite3.Row) -> Record:
 def _record_id(record: Record) -> str:
     raw = f"{record.source_id}|{record.archived_at}|{record.url}"
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+
+def _column_names(conn: sqlite3.Connection) -> set[str]:
+    rows = conn.execute("PRAGMA table_info(records)").fetchall()
+    return {row[1] for row in rows}
+
+
+def _add_column(conn: sqlite3.Connection, name: str, col_type: str) -> None:
+    conn.execute(f"ALTER TABLE records ADD COLUMN {name} {col_type}")
+
+
+def _ensure_column(conn: sqlite3.Connection, name: str, col_type: str) -> None:
+    if name in _column_names(conn):
+        return
+    _add_column(conn, name, col_type)
+
+
+def _ensure_columns(conn: sqlite3.Connection, names: list[str]) -> None:
+    for name in names:
+        _ensure_column(conn, name, "TEXT")

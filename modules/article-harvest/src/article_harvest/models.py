@@ -74,6 +74,8 @@ class Record:
     comments_count: int | None = None
     score: int | None = None
     extra: dict[str, str | int | None] = field(default_factory=dict)
+    item_id: str | None = None
+    content_path: str | None = None
 
     def to_dict(self) -> dict[str, str | int | None | dict[str, str | int | None]]:
         return {
@@ -90,4 +92,6 @@ class Record:
             "comments_count": self.comments_count,
             "score": self.score,
             "extra": self.extra or None,
+            "item_id": self.item_id,
+            "content_path": self.content_path,
         }
