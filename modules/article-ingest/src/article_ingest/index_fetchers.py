@@ -9,6 +9,11 @@ import feedparser
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
+from .index_fetcher_utils import (
+    apply_query,
+    decode_devalue_data,
+    extract_release_root,
+)
 from .index_models import (
     IndexComment,
     IndexEntry,
@@ -19,10 +24,15 @@ from .index_models import (
 )
 
 HN_TOP_LIMIT = 30
+HN_COMMENT_MAX_SECONDS = 30
+HN_COMMENT_MAX_REQUESTS = 300
 LOBSTERS_LIMIT = 25
 DEFAULT_INDEX_LIMIT = 15
 RELEASEBOT_LIMIT = 10
 MAX_COMMENT_COUNT = 50
+
+_apply_query = apply_query
+_decode_devalue_data = decode_devalue_data
 
 def _iso_from_unix(seconds: int | None) -> str | None:
     if seconds is None:
@@ -38,18 +48,42 @@ def _normalize_comment_body(html: str | None) -> str:
     markdown = md(html, heading_style="ATX")
     return "\n".join(line.rstrip() for line in markdown.splitlines()).strip()
 
+
+class _HnCommentBudget:
+    def __init__(self, max_seconds: int, max_requests: int) -> None:
+        self.max_seconds = max_seconds
+        self.max_requests = max_requests
+        self.started_at = time.monotonic()
+        self.requests = 0
+
+    def exhausted(self) -> bool:
+        if self.requests >= self.max_requests:
+            return True
+        return (time.monotonic() - self.started_at) >= self.max_seconds
+
+    def record_request(self) -> None:
+        self.requests += 1
+
+
 def _collect_hn_comments(
     requestor: IndexRequestor,
     root_ids: list[int] | None,
     max_count: int = MAX_COMMENT_COUNT,
+    budget: _HnCommentBudget | None = None,
 ) -> list[IndexComment]:
     if not root_ids:
         return []
     queue: deque[tuple[int, int]] = deque((comment_id, 0) for comment_id in root_ids)
     comments: list[IndexComment] = []
     while queue and len(comments) < max_count:
+        if budget and budget.exhausted():
+            break
         comment_id, depth = queue.popleft()
         try:
+            if budget:
+                if budget.exhausted():
+                    break
+                budget.record_request()
             item = requestor.get_json(
                 f"https://hacker-news.firebaseio.com/v0/item/{comment_id}.json"
             )
@@ -85,6 +119,10 @@ def _fetch_hn_entries(requestor: IndexRequestor) -> list[IndexEntry]:
     top_ids = requestor.get_json("https://hacker-news.firebaseio.com/v0/topstories.json")
     if not isinstance(top_ids, list):
         raise IndexFetchError("HN topstories response invalid")
+    comment_budget = _HnCommentBudget(
+        max_seconds=HN_COMMENT_MAX_SECONDS,
+        max_requests=HN_COMMENT_MAX_REQUESTS,
+    )
     entries: list[IndexEntry] = []
     for story_id in top_ids[:HN_TOP_LIMIT]:
         try:
@@ -102,7 +140,7 @@ def _fetch_hn_entries(requestor: IndexRequestor) -> list[IndexEntry]:
         external_link_missing = not bool(url)
         if not url:
             url = f"https://news.ycombinator.com/item?id={story_id}"
-        comments = _collect_hn_comments(requestor, item.get("kids"))
+        comments = _collect_hn_comments(requestor, item.get("kids"), budget=comment_budget)
         entries.append(
             IndexEntry(
                 title=title,
@@ -204,56 +242,12 @@ def _fetch_lobsters_entries(requestor: IndexRequestor) -> list[IndexEntry]:
     return entries
 
 
-def _apply_query(url: str, params: dict[str, Any]) -> str:
-    from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
-    parts = urlsplit(url)
-    query = dict(parse_qsl(parts.query, keep_blank_values=True))
-    query.update({k: v for k, v in params.items() if v is not None})
-    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
-
-
-def _decode_devalue_data(data: list[Any]) -> Any:
-    def resolve_value(value: Any) -> Any:
-        if isinstance(value, list):
-            return [
-                resolve_ref(item)
-                if isinstance(item, int) and not isinstance(item, bool) and item >= 0
-                else resolve_value(item)
-                for item in value
-            ]
-        if isinstance(value, dict):
-            return {
-                key: resolve_ref(item)
-                if isinstance(item, int) and not isinstance(item, bool) and item >= 0
-                else resolve_value(item)
-                for key, item in value.items()
-            }
-        return value
-    def resolve_ref(index: int) -> Any:
-        return resolve_value(data[index])
-    if not data:
-        return None
-    return resolve_value(data[0])
-
-
-def _extract_release_root(payload: dict[str, Any]) -> dict[str, Any]:
-    nodes = payload.get("nodes", [])
-    for node in nodes:
-        data = node.get("data") if isinstance(node, dict) else None
-        if not isinstance(data, list) or not data:
-            continue
-        root = _decode_devalue_data(data)
-        if isinstance(root, dict) and "releases" in root:
-            return root
-    raise IndexFetchError("Releasebot data missing releases")
-
-
 def _fetch_releasebot_entries(requestor: IndexRequestor) -> list[IndexEntry]:
     data_url = "https://releasebot.io/updates/__data.json"
     payload = requestor.get_json(data_url)
     if not isinstance(payload, dict):
         raise IndexFetchError("Releasebot payload invalid")
-    root = _extract_release_root(payload)
+    root = extract_release_root(payload)
     releases = root.get("releases") or []
     entries: list[IndexEntry] = []
     for release in releases[:RELEASEBOT_LIMIT]:
@@ -401,7 +395,7 @@ def _fetch_github_trending_community(requestor: IndexRequestor) -> list[IndexEnt
 
 def _fetch_github_trending_search(requestor: IndexRequestor) -> list[IndexEntry]:
     since = (datetime.now(timezone.utc).date() - timedelta(days=1)).isoformat()
-    query = _apply_query(
+    query = apply_query(
         "https://api.github.com/search/repositories",
         {
             "q": f"created:>{since}",
