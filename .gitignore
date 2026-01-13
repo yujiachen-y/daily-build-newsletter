@@ -4,5 +4,7 @@
 .venv/
 modules/article-ingest/data/
 modules/article-ingest/.coverage
+modules/article-harvest/data/
+modules/article-harvest/.coverage
 __pycache__/
 *.egg-info/

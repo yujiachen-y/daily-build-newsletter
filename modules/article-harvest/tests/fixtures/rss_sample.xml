@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Sample Feed</title>
+    <item>
+      <title>Sample Post</title>
+      <link>https://example.com/sample</link>
+      <pubDate>Tue, 13 Jan 2026 10:00:00 GMT</pubDate>
+      <description><![CDATA[<p>Hello <strong>world</strong></p>]]></description>
+    </item>
+  </channel>
+</rss>
