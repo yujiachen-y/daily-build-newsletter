@@ -57,9 +57,9 @@ class Storage:
                 records.append(json.loads(line))
         return records
 
-    def existing_urls(self, source_id: str) -> set[str]:
+    def existing_by_url(self, source_id: str) -> dict[str, dict[str, str | int | None]]:
         return {
-            str(record.get("url"))
+            str(record.get("url")): record
             for record in self.load_manifest(source_id)
             if record.get("url")
         }
@@ -80,12 +80,14 @@ class Storage:
     def save_blog_items(self, source: Source, items: list[BlogItem]) -> list[Record]:
         self.ensure_dirs(source.id)
         archived_at = iso_now()
-        existing = self.existing_urls(source.id)
+        existing_records = self.existing_by_url(source.id)
         stored_records: list[Record] = []
         manifest_records: list[dict[str, str | int | None]] = []
 
         for item in items:
-            if item.url in existing:
+            existing = existing_records.get(item.url)
+            if existing:
+                self._update_empty_content(existing, item)
                 continue
             item_id = self._item_id(item.title, item.url)
             item_dir = self.items_dir(source.id) / item_id
@@ -214,3 +216,33 @@ class Storage:
             "comments": [asdict(comment) for comment in item.comments],
             "extra": item.extra or {},
         }
+
+    def _update_empty_content(self, existing: dict[str, str | int | None], item: BlogItem) -> None:
+        content_path = existing.get("content_path")
+        if not content_path:
+            return
+        path = self.data_root / str(content_path)
+        if not path.exists():
+            return
+        content = item.content_markdown or item.summary or ""
+        if not self._needs_content_refresh(path, content):
+            return
+        if not content:
+            return
+        path.write_text(content, encoding="utf-8")
+
+    @staticmethod
+    def _needs_content_refresh(path: Path, new_content: str) -> bool:
+        if path.stat().st_size == 0:
+            return True
+        if not new_content:
+            return False
+        preview = path.read_text(encoding="utf-8")[:800]
+        if "|  |" in preview:
+            return True
+        for line in preview.splitlines():
+            if line.strip() == "|":
+                return True
+        if preview.lstrip().startswith("[Signup]"):
+            return True
+        return False

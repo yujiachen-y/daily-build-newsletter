@@ -26,6 +26,27 @@ def test_save_blog_items_and_manifest(tmp_path):
     stored_again = storage.save_blog_items(source, items)
     assert stored_again == []
 
+    empty_item = BlogItem(title="Empty", url="https://example.com/empty", content_markdown="")
+    storage.save_blog_items(source, [empty_item])
+    stored_fill = storage.save_blog_items(
+        source,
+        [BlogItem(title="Empty", url="https://example.com/empty", content_markdown="filled")],
+    )
+    assert stored_fill == []
+    existing = storage.existing_by_url(source.id)
+    content_path = tmp_path / str(existing["https://example.com/empty"]["content_path"])
+    assert content_path.read_text(encoding="utf-8") == "filled"
+
+    table_item = BlogItem(title="Table", url="https://example.com/table", content_markdown="|  |  |")
+    storage.save_blog_items(source, [table_item])
+    storage.save_blog_items(
+        source,
+        [BlogItem(title="Table", url="https://example.com/table", content_markdown="clean")],
+    )
+    existing = storage.existing_by_url(source.id)
+    content_path = tmp_path / str(existing["https://example.com/table"]["content_path"])
+    assert content_path.read_text(encoding="utf-8") == "clean"
+
 
 def test_save_snapshot_and_iterate(tmp_path):
     storage = Storage(tmp_path)

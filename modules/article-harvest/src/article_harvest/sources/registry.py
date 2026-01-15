@@ -24,6 +24,11 @@ from .blogs.simon_willison import source as simon_willison_source
 from .blogs.sorrycc import source as sorrycc_source
 from .blogs.stratechery import source as stratechery_source
 from .blogs.trends_vc import source as trends_vc_source
+from .blogs.lennys_newsletter import source as lennys_newsletter_source
+from .blogs.mailchimp_archive import source as mailchimp_archive_source
+from .blogs.crunchbase_news import source as crunchbase_news_source
+from .blogs.techmeme import source as techmeme_source
+from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
 
 
 _SOURCES: list[Source] = [
@@ -50,6 +55,11 @@ _SOURCES: list[Source] = [
     sorrycc_source(),
     stratechery_source(),
     trends_vc_source(),
+    lennys_newsletter_source(),
+    mailchimp_archive_source(),
+    crunchbase_news_source(),
+    techmeme_source(),
+    alphasignal_last_email_source(),
 ]
 
 
