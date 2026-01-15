@@ -3,8 +3,13 @@ set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel)
 MODULE="$ROOT/modules/article-ingest"
-VENV="$MODULE/.venv"
 
+if [ ! -d "$MODULE" ]; then
+  echo "article-ingest removed; skipping article-ingest hooks"
+  exit 0
+fi
+
+VENV="$MODULE/.venv"
 if [ -d "$VENV" ]; then
   # shellcheck disable=SC1090
   source "$VENV/bin/activate"
