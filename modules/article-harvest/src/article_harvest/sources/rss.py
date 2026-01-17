@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 import feedparser
@@ -10,17 +11,29 @@ from ..http import get_bytes
 from ..models import BlogItem, FetchContext, Source
 
 
-def make_rss_source(source_id: str, name: str, feed_url: str) -> Source:
+def make_rss_source(
+    source_id: str,
+    name: str,
+    feed_url: str,
+    *,
+    html_to_markdown: Callable[[str], str] | None = None,
+) -> Source:
     return Source(
         id=source_id,
         name=name,
         kind="blog",
         method="rss",
-        fetch=lambda ctx: fetch_rss(ctx, feed_url),
+        fetch=lambda ctx: fetch_rss(ctx, feed_url, html_to_markdown=html_to_markdown),
     )
 
 
-def fetch_rss(ctx: FetchContext, feed_url: str, limit: int | None = None) -> list[BlogItem]:
+def fetch_rss(
+    ctx: FetchContext,
+    feed_url: str,
+    limit: int | None = None,
+    *,
+    html_to_markdown: Callable[[str], str] | None = None,
+) -> list[BlogItem]:
     data = feedparser.parse(get_bytes(ctx.session, feed_url))
     if data.bozo:
         raise FetchError(f"RSS parse error for {feed_url}")
@@ -34,7 +47,12 @@ def fetch_rss(ctx: FetchContext, feed_url: str, limit: int | None = None) -> lis
         author = entry.get("author")
         summary = entry.get("summary")
         content_html = _extract_content_html(entry)
-        content_markdown = md(content_html) if content_html else (summary or "")
+        if content_html:
+            content_markdown = (
+                html_to_markdown(content_html) if html_to_markdown else md(content_html)
+            )
+        else:
+            content_markdown = summary or ""
         items.append(
             BlogItem(
                 title=str(title),

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Hugging Face - Blog</title>
+    <link>https://huggingface.co/blog</link>
+    <description>The Hugging Face blog</description>
+    <item>
+      <title>Test HF Post</title>
+      <pubDate>Fri, 17 Jan 2026 00:00:00 GMT</pubDate>
+      <link>https://example.com/hf-post</link>
+      <guid isPermaLink="false">hf-post</guid>
+    </item>
+  </channel>
+</rss>

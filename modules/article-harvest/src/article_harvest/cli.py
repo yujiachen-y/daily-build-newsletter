@@ -10,6 +10,7 @@ from .queries import query_by_archive_date, query_by_keyword, query_by_source
 from .sources.registry import get_source, list_sources
 from .sqlite_index import rebuild_sqlite_index
 from .storage import Storage
+from .verify_data import verify_data_root
 
 
 def main() -> int:
@@ -57,6 +58,27 @@ def main() -> int:
     query_archive.add_argument("--limit", type=int)
     query_archive.add_argument("--json", action="store_true", help="JSON output")
 
+    verify_parser = subparsers.add_parser("verify", help="Verify stored data under data/")
+    verify_parser.add_argument("--source", action="append", help="Source id to verify (repeatable)")
+    verify_parser.add_argument(
+        "--min-chars",
+        type=int,
+        default=400,
+        help="Minimum content length to treat as ok",
+    )
+    verify_parser.add_argument(
+        "--max-issues",
+        type=int,
+        default=200,
+        help="Max issues to include in output",
+    )
+    verify_parser.add_argument(
+        "--snippets",
+        action="store_true",
+        help="Include content snippets in output",
+    )
+    verify_parser.add_argument("--json", action="store_true", help="JSON output")
+
     args = parser.parse_args()
 
     if args.command == "ingest":
@@ -65,6 +87,46 @@ def main() -> int:
         return 0
 
     storage = Storage()
+
+    if args.command == "verify":
+        source_ids = set(args.source) if args.source else None
+        report = verify_data_root(
+            storage.data_root,
+            source_ids=source_ids,
+            min_content_chars=args.min_chars,
+            max_issues=args.max_issues,
+            include_snippets=args.snippets,
+        )
+        if args.json:
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return 0
+
+        totals = report.get("totals") or {}
+        items_checked = totals.get("items_checked")
+        issues_total = totals.get("issues_total")
+        issues_truncated = totals.get("issues_truncated")
+        print(
+            f"items_checked={items_checked} issues_total={issues_total} "
+            f"issues_truncated={issues_truncated}"
+        )
+        for entry in report.get("sources") or []:
+            issues = entry.get("issues") or {}
+            issues_str = ", ".join([f"{k}={v}" for k, v in sorted(issues.items())])
+            print(
+                f"- {entry.get('source_id')} ({entry.get('kind')}): "
+                f"items_checked={entry.get('items_checked')} issues={issues_str or 'none'}"
+            )
+        if report.get("issues"):
+            print("\nexamples:")
+            for issue in report["issues"][: min(20, len(report["issues"]))]:
+                detail = issue.get("detail")
+                extra = f" ({detail})" if detail else ""
+                path = issue.get("path") or ""
+                print(
+                    f"- {issue.get('source_id')}:{issue.get('item_id') or '-'} "
+                    f"{issue.get('issue_type')}{extra} {path}"
+                )
+        return 0
 
     if args.command == "sources":
         sources = list_sources()
