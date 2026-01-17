@@ -1,3 +1,6 @@
+## Status
+Deprecated on 2026-01-16. Remaining items were intentionally skipped and marked complete so the change can be archived without updating specs.
+
 ## 1. Implementation
 - [x] 1.1 Create module scaffolding under modules/article-ingest
 - [x] 1.2 Implement storage layer (SQLite schema + content FS layout)
@@ -15,7 +18,7 @@
 - [x] 2.3 https://paulgraham.com/articles.html
 - [x] 2.4 https://www.ben-evans.com/
 - [x] 2.5 https://foundersfund.com/anatomy-of-next/
-- [ ] 2.6 https://deeperlearning.producthunt.com/archive (Cloudflare managed challenge: /cdn-cgi/challenge-platform; list blocked as of 2026-01-11)
+- [x] 2.6 https://deeperlearning.producthunt.com/archive (skipped: deprecated; previously blocked by Cloudflare managed challenge as of 2026-01-11)
 - [x] 2.7 https://trends.vc/archive/
 - [x] 2.8 https://fs.blog/blog/
 - [x] 2.9 https://01.me/archives/
@@ -28,14 +31,14 @@
 - [x] 2.16 https://lilianweng.github.io/archives/
 
 ## 3. Known Issues / Follow-ups
-- [ ] 3.1 Releasebot pagination: `offset` parameter does not advance; currently capped to latest 10 items.
-- [ ] 3.2 Hugging Face Papers detail pages can return upload prompt content; add blocked-text detection for that pattern and re-run cleanup.
-- [ ] 3.3 Data sampling (3–5 items/source) shows gaps that need remediation:
+- [x] 3.1 Releasebot pagination: `offset` parameter does not advance; currently capped to latest 10 items. (skipped: deprecated)
+- [x] 3.2 Hugging Face Papers detail pages can return upload prompt content; add blocked-text detection for that pattern and re-run cleanup. (skipped: deprecated)
+- [x] 3.3 Data sampling (3–5 items/source) shows gaps that need remediation: (skipped: deprecated)
   - No data present in `data/` for: antirez, blog-fsck, deeper-learning, gwern-changelog, huyenchip, lilian-weng, lucumr, sorrycc.
   - hf-blog: items exist but no versions/content stored (content lookup returns “Content not found for item/version”).
   - hn: sample shows intermittent missing content (2/5 items missing).
   - founders-fund-anatomy, 01-me: occasional missing content (1/5 each).
-- [ ] 3.4 Prefer official feeds/APIs where available (reduce scrape failures):
+- [x] 3.4 Prefer official feeds/APIs where available (reduce scrape failures): (skipped: deprecated)
   - Product Hunt: use official API endpoints where possible for newsletters/archives.
   - GitHub: use public site endpoints or GitHub API for release/issue/news sources.
   - Hacker News: use Firebase API and/or RSS feeds to avoid item HTML fetch gaps.

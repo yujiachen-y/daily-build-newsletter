@@ -1,5 +1,8 @@
 # Change: Add article ingest module
 
+## Status
+Deprecated on 2026-01-16. This change was not deployed; archived without updating specs.
+
 ## Why
 We need a local, versioned ingestion module to collect articles from multiple sources and track updates over time for a larger newsletter system.
 
@@ -11,4 +14,4 @@ We need a local, versioned ingestion module to collect articles from multiple so
 
 ## Impact
 - Affected specs: article-ingest
-- Affected code: new module under modules/article-ingest (not created yet)
+- Affected code: new module under modules/article-ingest (not created; deprecated change)
