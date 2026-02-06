@@ -7,3 +7,4 @@ modules/article-harvest/.coverage
 .agent/skills/daily-article-generator/assets/
 __pycache__/
 *.egg-info/
+*.local.json
