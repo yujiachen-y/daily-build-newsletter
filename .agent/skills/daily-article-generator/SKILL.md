@@ -71,3 +71,26 @@ description: Generate a daily article digest/newsletter by checking article-harv
 
 ## Assets
 - `assets/` 用于保存每日输出文件夹（YYYY-MM-DD）。
+
+## 注意事项：路径处理
+
+**重要**：执行 `article-harvest` CLI 时会进入 `modules/article-harvest/` 子目录，此时工作目录不再是仓库根目录。在查找历史数据和写入 assets 时，**必须使用绝对路径**，否则相对路径会从子目录出发导致找不到文件。
+
+正确做法：
+```
+# 使用绝对路径访问 skill assets
+/Users/.../daily-build-newsletter/.claude/skills/daily-article-generator/assets/
+```
+
+错误做法：
+```
+# 相对路径在 modules/article-harvest/ 下会失效
+.claude/skills/daily-article-generator/assets/
+```
+
+Skill 的 base directory 在消息开头会给出，形如：
+```
+Base directory for this skill: /path/to/daily-build-newsletter/.claude/skills/daily-article-generator
+```
+
+基于此路径拼接 `assets/YYYY-MM-DD/` 即可。
