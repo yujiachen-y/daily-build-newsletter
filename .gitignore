@@ -2,7 +2,6 @@
 .venv/
 .pytest_cache/
 .ruff_cache/
-.claude/
 
 modules/article-harvest/data/
 modules/article-harvest/.coverage
