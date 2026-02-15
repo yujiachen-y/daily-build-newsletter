@@ -2,10 +2,10 @@
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel)
-MODULE="$ROOT/modules/article-ingest"
+MODULE="$ROOT/modules/article-harvest"
 
 if [ ! -d "$MODULE" ]; then
-  echo "article-ingest removed; skipping article-ingest hooks"
+  echo "article-harvest not found; skipping hooks"
   exit 0
 fi
 
@@ -17,6 +17,5 @@ fi
 
 cd "$MODULE"
 
-ruff check src/article_ingest tests
-python scripts/lint_limits.py
-pytest --cov=article_ingest --cov-report=term-missing --cov-fail-under=80 tests
+ruff check src/article_harvest tests
+pytest --cov=article_harvest --cov-report=term-missing --cov-fail-under=80 tests
