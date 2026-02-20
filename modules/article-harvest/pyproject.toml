@@ -26,6 +26,9 @@ article-harvest = "article_harvest.cli:main"
 [tool.pytest.ini_options]
 addopts = "-q"
 
+[tool.coverage.run]
+omit = ["src/article_harvest/cli.py"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
