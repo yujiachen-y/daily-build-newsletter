@@ -29,7 +29,9 @@ def query_by_keyword(
 ) -> list[Record]:
     index = _sqlite_index(storage)
     if index:
-        selected_sources = [source.id for source in sources if not source_id or source.id == source_id]
+        selected_sources = [
+            source.id for source in sources if not source_id or source.id == source_id
+        ]
         return index.query_by_keyword(keyword, source_ids=selected_sources, limit=limit)
     keyword_lower = keyword.lower()
     records: list[Record] = []
@@ -55,7 +57,9 @@ def query_by_archive_date(
     start_date, end_date = _resolve_range(on, start, end)
     index = _sqlite_index(storage)
     if index:
-        selected_sources = [source.id for source in sources if not source_id or source.id == source_id]
+        selected_sources = [
+            source.id for source in sources if not source_id or source.id == source_id
+        ]
         return index.query_by_archive_date(
             start_date.isoformat(),
             end_date.isoformat(),

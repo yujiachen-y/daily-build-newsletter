@@ -11,7 +11,6 @@ from .sources.registry import list_sources
 from .storage import Storage, default_data_root
 from .time_utils import iso_now, parse_date
 
-
 DEFAULT_DB_NAME = "index.sqlite"
 
 

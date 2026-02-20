@@ -64,7 +64,9 @@ class Storage:
             if record.get("url")
         }
 
-    def append_manifest(self, source_id: str, records: Iterable[dict[str, str | int | None]]) -> None:
+    def append_manifest(
+        self, source_id: str, records: Iterable[dict[str, str | int | None]]
+    ) -> None:
         path = self.manifest_path(source_id)
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("a", encoding="utf-8") as handle:

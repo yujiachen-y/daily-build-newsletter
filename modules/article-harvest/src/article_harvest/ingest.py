@@ -5,8 +5,8 @@ from datetime import datetime
 from .errors import FetchError
 from .http import create_session
 from .models import BlogItem, FetchContext, Source
-from .sqlite_index import SQLiteIndex
 from .sources.registry import get_source, list_sources
+from .sqlite_index import SQLiteIndex
 from .storage import Storage
 from .time_utils import iso_now
 

@@ -56,8 +56,24 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - `d-deep-reads.md`
 
 ### 7) 日报编辑（四段小文）
+
+当消息源数量较多（>80 条）时，**推荐使用 agent team 并行撰写**以避免上下文溢出和质量下降：
+
+#### Agent Team 模式（推荐用于大规模数据）
+1. 使用 `TeamCreate` 创建 team。
+2. 使用 `TaskCreate` 为四个 Section 各建一个任务，任务描述中包含：
+   - 该 Section 的文章列表（标题、URL、分数、来源）
+   - 去重规则（过去 7 天已报道的条目及处理方式）
+   - 跨 Section 互斥规则（哪些条目归属其他 Section，不要重复）
+   - 写作规则（字数、深度要求、WebFetch 建议）
+3. 用 `Task` 工具为每个 Section 启动一个 `general-purpose` agent（`run_in_background=true`），指定 `team_name`。
+4. **关键：要求 agent 将写好的 Section 内容直接写入 `assets/YYYY-MM-DD/section-a-draft.md` 等文件**，而非通过 SendMessage 传递——文件写入比消息传递更可靠，team lead 可直接 Read 文件获取结果。
+5. 等待所有任务完成后，team lead 读取四个 draft 文件，审校、调整跨 Section 一致性，组装为最终 `summary.md`。
+6. 用 `SendMessage(type=shutdown_request)` 关闭所有 agent，用 `TeamDelete` 清理。
+
+#### 单 agent 模式（适用于数据量较小的日期）
 - 为每个分类撰写约 400 字中文小文章：
-  - 概述该类今日更新的主要脉络。
+  - 直接进入具体内容，不写概述/引导段落（读者会读完全文，不需要 hook）。
   - 选择其中 1 条重点展开（背景、意义、潜在影响）。
   - 避免与过去 7 天内容重复。
 
@@ -70,7 +86,8 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **每条新闻只在一个 Section 中深入展开**，选择最贴合的 Section 作为"主场"。
   - 例：GPT-5.2 物理学突破 → 深度文章（OpenAI 专题）；不在 HN Section 重复展开。
   - 例：moyin-creator → GitHub Section；不在 HN/Techmeme Section 重复讨论 Seedance。
-- **Summary 段落是索引而非重述**：用一两句话点出每类的核心亮点，引导读者跳转到对应 Section，不展开论述。
+- **Summary 段落是索引而非重述**：用一两句话点出每类的核心亮点，不展开论述。
+- **各 Section 不写概述/引导段落**：直接进入第一条具体内容，不要写"今日 HN 呈现……"之类的总结性开头。读者是唯一读者，会读完全文，不需要 hook 或 preview。
 - **跨 Section 引用用一句话带过**：如果 Section A 的内容与 Section B 的某条新闻相关，最多用"（参见深度文章 Section）"或一句话交代关联，不重复叙述背景和细节。
 - 省出的字数用于：更深的分析、更多条目的简报覆盖、或补充未被充分报道的内容。
 
@@ -78,6 +95,20 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **每条被提及的内容必须提供超越标题的信息增量**。如果只能写出"XXX 发布了 YYY"这种一句话复述，说明信息不足——要么用 WebFetch 抓取原文后展开分析，要么不提。
 - **对于 Lobsters / HN 等来源的技术文章**：挑选 2–3 篇有实质内容的展开写（技术细节、社区争论、行业影响），其余仅列标题或直接省略。不要试图覆盖所有条目——宁可少而深，不要多而浅。
 - **"展开"的标准**：读者看完这段后，不需要打开原文就能理解核心观点和关键细节。
+- **速览段落中被简要提及的条目也需要信息增量**。即使只用一句话介绍，也必须让读者理解"这篇文章在说什么"，而非只知道"有这么篇文章"。如果 WebFetch 后仍无法用一句话概括出有意义的内容，直接省略该条目。
+  - 反面例子：「**A Single Reason To Not Vibe Code**（30 分）从某角度反思开发者与 AI 的关系。」——读者看完不知道"某角度"是什么。
+  - 正面例子：「**A Single Reason To Not Vibe Code**（30 分）从神经科学角度论证：编程所需的时序逻辑能力像肌肉一样用进废退，长期外包给 LLM 会导致认知萎缩。」——一句话传递了核心论点。
+
+#### 低信号源处理原则（Releasebot / Product Hunt）
+- **Releasebot 和 Product Hunt 默认不出现在正文中**。这两个来源的条目绝大多数是常规版本更新或早期产品发布，以纯名称列表形式出现时零信息增量。
+- **例外**：如果某条 Releasebot/Product Hunt 内容具有行业影响力（如重大框架发布、知名产品重大版本），可以提升到正文中，但必须附带实质描述，不能只列名称。
+- 仅在分类文件（`a-hn-and-others.md`）中保留完整列表作为归档记录。
+
+#### GitHub 存量项目写作原则（避免 star 数字流水账）
+- **存量项目（已在前几天报道过的 repo）不要逐一列出 star 数据**。十几个 "项目名 **N 星**（+M）" 的罗列没有叙事价值。
+- **只挑出 2–3 个有故事的存量变化展开**：如增速异常（三天翻七倍）、破千星里程碑、品类异常（纯审美项目持续高增长）等。
+- **其余存量项目的 star 数据下沉到文末「去重说明」**，作为数据参考而非正文内容。
+- **退出 Trending 的项目**：简要列出退出项目名称和原因即可，不需要每个都附 star 数。
 
 ### 9) 收尾
 - 返回生成的文件路径清单，并说明是否发生去重与被移除的标题。

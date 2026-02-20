@@ -37,7 +37,9 @@ def test_save_blog_items_and_manifest(tmp_path):
     content_path = tmp_path / str(existing["https://example.com/empty"]["content_path"])
     assert content_path.read_text(encoding="utf-8") == "filled"
 
-    table_item = BlogItem(title="Table", url="https://example.com/table", content_markdown="|  |  |")
+    table_item = BlogItem(
+        title="Table", url="https://example.com/table", content_markdown="|  |  |"
+    )
     storage.save_blog_items(source, [table_item])
     storage.save_blog_items(
         source,

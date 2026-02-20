@@ -41,7 +41,9 @@ def test_sqlite_rebuild_parity(tmp_path):
     file_source = query_by_source(storage, blog_source)
     file_keyword = query_by_keyword(storage, sources, "hello")
     archived_date = parse_date(file_source[0].archived_at).isoformat()
-    file_archive = query_by_archive_date(storage, sources, on=archived_date, source_id=blog_source.id)
+    file_archive = query_by_archive_date(
+        storage, sources, on=archived_date, source_id=blog_source.id
+    )
 
     report = rebuild_sqlite_index(storage, sources)
     assert report["records"] >= 2

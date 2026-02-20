@@ -181,7 +181,8 @@ def _normalize_date(value: str) -> str | None:
 
 
 def _strip_unwanted(container: Tag) -> None:
-    for tag in container.find_all(["script", "style", "noscript", "header", "footer", "nav", "aside"]):
+    unwanted = ["script", "style", "noscript", "header", "footer", "nav", "aside"]
+    for tag in container.find_all(unwanted):
         tag.decompose()
 
 

@@ -4,8 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Callable, Literal
 
-import requests
-
+import requests  # noqa: TC002
 
 SourceKind = Literal["aggregation", "blog"]
 SourceMethod = Literal["api", "rss", "html", "agent"]
