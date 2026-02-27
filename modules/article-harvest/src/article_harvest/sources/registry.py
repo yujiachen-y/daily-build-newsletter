@@ -7,6 +7,8 @@ from .aggregations.hn import source as hn_source
 from .aggregations.lobsters import source as lobsters_source
 from .aggregations.product_hunt import source as product_hunt_source
 from .aggregations.releasebot import source as releasebot_source
+from .aggregations.skills_sh import source_hot as skills_sh_hot_source
+from .aggregations.skills_sh import source_trending as skills_sh_trending_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
 from .blogs.antirez import source as antirez_source
 from .blogs.ben_evans import source as ben_evans_source
@@ -41,6 +43,8 @@ _SOURCES: list[Source] = [
     hf_papers_source(),
     github_trending_source(),
     product_hunt_source(),
+    skills_sh_trending_source(),
+    skills_sh_hot_source(),
     zero_one_me_source(),
     antirez_source(),
     ben_evans_source(),

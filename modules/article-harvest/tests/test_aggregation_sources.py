@@ -12,6 +12,11 @@ from article_harvest.sources.aggregations.releasebot import (
     _decode_devalue_data,
     fetch_releasebot,
 )
+from article_harvest.sources.aggregations.skills_sh import (
+    _extract_skills,
+    fetch_hot,
+    fetch_trending,
+)
 
 # -- helpers --
 
@@ -311,3 +316,71 @@ def test_decode_devalue_data_with_refs():
 
 def test_decode_devalue_data_empty():
     assert _decode_devalue_data([]) is None
+
+
+# -- Skills.sh --
+
+_SKILLS_SH_TRENDING_HTML = (
+    '<html>self.__next_f.push([1,"\\"initialSkills\\":'
+    '[{\\"source\\":\\"acme/skills\\",\\"skillId\\":\\"cool-tool\\",'
+    '\\"name\\":\\"cool-tool\\",\\"installs\\":5000},'
+    '{\\"source\\":\\"org/repo\\",\\"skillId\\":\\"widget\\",'
+    '\\"name\\":\\"widget\\",\\"installs\\":3000}]"])</html>'
+)
+
+_SKILLS_SH_HOT_HTML = (
+    '<html>self.__next_f.push([1,"\\"initialSkills\\":'
+    '[{\\"source\\":\\"acme/skills\\",\\"skillId\\":\\"new-thing\\",'
+    '\\"name\\":\\"new-thing\\",\\"installs\\":200,'
+    '\\"installsYesterday\\":50,\\"change\\":150},'
+    '{\\"source\\":\\"org/repo\\",\\"skillId\\":\\"steady\\",'
+    '\\"name\\":\\"steady\\",\\"installs\\":100,'
+    '\\"installsYesterday\\":90,\\"change\\":10}]"])</html>'
+)
+
+
+def test_extract_skills_trending():
+    skills = _extract_skills(_SKILLS_SH_TRENDING_HTML)
+    assert len(skills) == 2
+    assert skills[0]["name"] == "cool-tool"
+    assert skills[0]["installs"] == 5000
+    assert skills[1]["skillId"] == "widget"
+
+
+def test_extract_skills_hot():
+    skills = _extract_skills(_SKILLS_SH_HOT_HTML)
+    assert len(skills) == 2
+    assert skills[0]["change"] == 150
+    assert skills[1]["installsYesterday"] == 90
+
+
+def test_fetch_trending():
+    session = _DummySession(default=_DummyResponse(text=_SKILLS_SH_TRENDING_HTML))
+    items = fetch_trending(_ctx(session))
+    assert len(items) == 2
+    assert items[0].title == "cool-tool"
+    assert items[0].rank == 1
+    assert items[0].score == 5000
+    assert items[0].author == "acme"
+    assert items[0].url == "https://skills.sh/acme/skills/cool-tool"
+    assert items[0].extra["source_repo"] == "acme/skills"
+    assert items[1].rank == 2
+    assert items[1].title == "widget"
+
+
+def test_fetch_hot():
+    session = _DummySession(default=_DummyResponse(text=_SKILLS_SH_HOT_HTML))
+    items = fetch_hot(_ctx(session))
+    assert len(items) == 2
+    assert items[0].title == "new-thing"
+    assert items[0].score == 200
+    assert items[0].extra["change"] == 150
+    assert items[0].extra["installs_yesterday"] == 50
+    assert items[1].extra["change"] == 10
+
+
+def test_extract_skills_missing_raises():
+    import pytest
+
+    with pytest.raises(Exception, match="initialSkills not found"):
+        _extract_skills("<html>no data here</html>")
