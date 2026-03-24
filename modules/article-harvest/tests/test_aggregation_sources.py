@@ -94,38 +94,41 @@ def test_fetch_hf_papers():
 
 # -- GitHub Trending --
 
+_GITHUB_TRENDING_HTML = """\
+<html><body>
+<article class="Box-row">
+  <h2><a href="/user/repo1"> user / repo1 </a></h2>
+  <p>A cool repo</p>
+  <span itemprop="programmingLanguage">Python</span>
+  <a href="/user/repo1/stargazers"> 1,234 </a>
+  <span class="d-inline-block float-sm-right">256 stars today</span>
+</article>
+<article class="Box-row">
+  <h2><a href="/org/repo2"> org / repo2 </a></h2>
+  <p>Another repo</p>
+  <span itemprop="programmingLanguage">Rust</span>
+  <a href="/org/repo2/stargazers"> 567 </a>
+  <span class="d-inline-block float-sm-right">89 stars today</span>
+</article>
+</body></html>
+"""
+
 
 def test_fetch_github_trending():
-    payload = {
-        "items": [
-            {
-                "full_name": "user/repo1",
-                "html_url": "https://github.com/user/repo1",
-                "created_at": "2026-01-01",
-                "owner": {"login": "user"},
-                "stargazers_count": 100,
-                "language": "Python",
-                "description": "A cool repo",
-            },
-            {
-                "full_name": "org/repo2",
-                "html_url": "https://github.com/org/repo2",
-                "created_at": "2026-01-02",
-                "owner": {"login": "org"},
-                "stargazers_count": 50,
-                "language": "Rust",
-                "description": "Another repo",
-            },
-        ]
-    }
-    session = _DummySession(default=_DummyResponse(json_data=payload))
+    session = _DummySession(default=_DummyResponse(text=_GITHUB_TRENDING_HTML))
     items = fetch_github_trending(_ctx(session))
     assert len(items) == 2
     assert items[0].title == "user/repo1"
+    assert items[0].url == "https://github.com/user/repo1"
     assert items[0].author == "user"
-    assert items[0].score == 100
+    assert items[0].score == 1234
     assert items[0].extra.get("language") == "Python"
+    assert items[0].extra.get("description") == "A cool repo"
+    assert items[0].extra.get("stars_today") == 256
+    assert items[1].title == "org/repo2"
     assert items[1].rank == 2
+    assert items[1].score == 567
+    assert items[1].extra.get("stars_today") == 89
 
 
 # -- Lobsters --
