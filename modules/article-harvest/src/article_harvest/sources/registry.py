@@ -28,6 +28,7 @@ from .blogs.openai_dev_blog import source as openai_dev_blog_source
 from .blogs.openai_news import source as openai_news_source
 from .blogs.paul_graham import source as paul_graham_source
 from .blogs.pragmatic_engineer import source as pragmatic_engineer_source
+from .blogs.ramp_builders import source as ramp_builders_source
 from .blogs.simon_willison import source as simon_willison_source
 from .blogs.sorrycc import source as sorrycc_source
 from .blogs.stratechery import source as stratechery_source
@@ -61,6 +62,7 @@ _SOURCES: list[Source] = [
     openai_news_source(),
     paul_graham_source(),
     pragmatic_engineer_source(),
+    ramp_builders_source(),
     simon_willison_source(),
     sorrycc_source(),
     stratechery_source(),
