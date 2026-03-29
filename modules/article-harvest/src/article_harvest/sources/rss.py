@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import calendar
 from collections.abc import Callable
+from datetime import datetime, timedelta
 from typing import Any
 
 import feedparser
@@ -17,13 +19,16 @@ def make_rss_source(
     feed_url: str,
     *,
     html_to_markdown: Callable[[str], str] | None = None,
+    max_age_days: int | None = None,
 ) -> Source:
     return Source(
         id=source_id,
         name=name,
         kind="blog",
         method="rss",
-        fetch=lambda ctx: fetch_rss(ctx, feed_url, html_to_markdown=html_to_markdown),
+        fetch=lambda ctx: fetch_rss(
+            ctx, feed_url, html_to_markdown=html_to_markdown, max_age_days=max_age_days
+        ),
     )
 
 
@@ -33,10 +38,14 @@ def fetch_rss(
     limit: int | None = None,
     *,
     html_to_markdown: Callable[[str], str] | None = None,
+    max_age_days: int | None = None,
 ) -> list[BlogItem]:
     data = feedparser.parse(get_bytes(ctx.session, feed_url))
     if data.bozo:
         raise FetchError(f"RSS parse error for {feed_url}")
+
+    cutoff = ctx.now - timedelta(days=max_age_days) if max_age_days else None
+
     items: list[BlogItem] = []
     for entry in data.entries[:limit]:
         title = entry.get("title")
@@ -44,6 +53,10 @@ def fetch_rss(
         if not title or not link:
             continue
         published = entry.get("published") or entry.get("updated")
+
+        if cutoff and _is_before_cutoff(entry, cutoff):
+            continue
+
         author = entry.get("author")
         summary = entry.get("summary")
         content_html = _extract_content_html(entry)
@@ -66,6 +79,18 @@ def fetch_rss(
     if not items:
         raise FetchError(f"RSS feed empty for {feed_url}")
     return items
+
+
+def _is_before_cutoff(entry: Any, cutoff: datetime) -> bool:
+    """Return True if the entry's published date is before the cutoff."""
+    parsed = entry.get("published_parsed") or entry.get("updated_parsed")
+    if not parsed:
+        return False  # keep articles with no date
+    try:
+        entry_dt = datetime.utcfromtimestamp(calendar.timegm(parsed))
+        return entry_dt < cutoff
+    except (ValueError, OverflowError, OSError):
+        return False
 
 
 def _extract_content_html(entry: Any) -> str | None:
