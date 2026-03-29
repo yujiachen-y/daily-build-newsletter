@@ -13,3 +13,4 @@ editorial_workspace/
 __pycache__/
 *.egg-info/
 *.local.json
+.env.local
