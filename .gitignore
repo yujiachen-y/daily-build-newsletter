@@ -5,7 +5,7 @@
 
 modules/article-harvest/data/
 modules/article-harvest/.coverage
-.agent/skills/daily-article-generator/assets/
+assets/
 
 docs/reports/article-harvest/
 editorial_workspace/

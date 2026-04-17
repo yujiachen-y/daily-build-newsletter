@@ -6,7 +6,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 # Daily Article Generator
 
 ## Overview
-生成每日文章所需的完整流程：检查/爬取、去重、分类、落盘（skill assets）、撰写四段小文与汇总稿（中文）。
+生成每日文章所需的完整流程：检查/爬取、去重、分类、落盘（仓库根目录 `assets/`）、撰写四段小文与汇总稿（中文）。
 
 ## Workflow
 
@@ -42,7 +42,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 5. **不要在正文中直接引用 ainews-smol 或 alphasignal 作为信息来源**——它们是二手聚合源，提取出的子条目应追溯到原始出处。
 
 ### 4) 近 7 天去重（选题前置）
-- 在本 skill 的 `assets/` 下查找过去 7 天的文件夹（YYYY-MM-DD）。
+- 在仓库根目录的 `assets/` 下查找过去 7 天的文件夹（YYYY-MM-DD）。
 - 读取这些日期的 `summary.md` 与四个分类文件，建立已报道标题/URL 列表。
 - 如发现重复：优先保留今日条目中更新更显著或权重更高的版本，其他条目从今日清单移除，并在写作时避免重复叙述。
 
@@ -65,8 +65,8 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **HN/其他网站（Section A）**：不属于以上三类的所有条目。
 - 若条目匹配多个分类，选择最贴合的一类，保证分类互斥。
 
-### 6) 写入分类文件（skill assets）
-- 在 `assets/YYYY-MM-DD/` 创建当日文件夹。
+### 6) 写入分类文件
+- 在仓库根目录 `assets/YYYY-MM-DD/` 创建当日文件夹。
 - 创建四个文件并写入标题清单（标题在前，可附 URL）：
   - `a-hn-and-others.md`
   - `b-github-repos.md`
@@ -85,7 +85,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
    - 跨 Section 互斥规则（哪些条目归属其他 Section，不要重复）
    - 写作规则（字数、深度要求、WebFetch 建议）
 3. 用 `Task` 工具为每个 Section 启动一个 `general-purpose` agent（`run_in_background=true`），指定 `team_name`。
-4. **关键：要求 agent 将写好的 Section 内容直接写入 `assets/YYYY-MM-DD/section-a-draft.md` 等文件**，而非通过 SendMessage 传递——文件写入比消息传递更可靠，team lead 可直接 Read 文件获取结果。
+4. **关键：要求 agent 将写好的 Section 内容直接写入仓库根目录 `assets/YYYY-MM-DD/section-a-draft.md` 等文件**，而非通过 SendMessage 传递——文件写入比消息传递更可靠，team lead 可直接 Read 文件获取结果。
 5. 等待所有任务完成后，team lead 读取四个 draft 文件，审校、调整跨 Section 一致性，组装为最终 `summary.md`。
 6. **组装后审查（防 Section 内重复）**：如果需要扩充内容以达到目标行数，**必须先搜索当前 Section 已有文本**，确认新增内容与同 Section 内已有条目不重复。付费墙源（如 The Information）条目多且标题相似，尤其容易在"要闻提炼列表"和"主题展开段落"之间产生重复。具体做法：扩充前对该 Section 内的关键实体（公司名、人名、产品名）做一次文本搜索，命中则合并而非新增。
 7. 用 `SendMessage(type=shutdown_request)` 关闭所有 agent，用 `TeamDelete` 清理。
@@ -144,27 +144,13 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - 返回生成的文件路径清单，并说明是否发生去重与被移除的标题。
 
 ## Assets
-- `assets/` 用于保存每日输出文件夹（YYYY-MM-DD）。
+- 仓库根目录 `assets/` 用于保存每日输出文件夹（YYYY-MM-DD），已加入 `.gitignore`。
 
 ## 注意事项：路径处理
 
-**重要**：执行 `article-harvest` CLI 时会进入 `modules/article-harvest/` 子目录，此时工作目录不再是仓库根目录。在查找历史数据和写入 assets 时，**必须使用绝对路径**，否则相对路径会从子目录出发导致找不到文件。
+**重要**：执行 `article-harvest` CLI 时会进入 `modules/article-harvest/` 子目录，此时工作目录不再是仓库根目录。在查找历史数据和写入 assets 时，**必须使用绝对路径或先回到仓库根目录**。
 
-正确做法：
+assets 路径为仓库根目录下的 `assets/`，即：
 ```
-# 使用绝对路径访问 skill assets
-/Users/.../daily-build-newsletter/.claude/skills/daily-article-generator/assets/
+/path/to/daily-build-newsletter/assets/YYYY-MM-DD/
 ```
-
-错误做法：
-```
-# 相对路径在 modules/article-harvest/ 下会失效
-.claude/skills/daily-article-generator/assets/
-```
-
-Skill 的 base directory 在消息开头会给出，形如：
-```
-Base directory for this skill: /path/to/daily-build-newsletter/.claude/skills/daily-article-generator
-```
-
-基于此路径拼接 `assets/YYYY-MM-DD/` 即可。
