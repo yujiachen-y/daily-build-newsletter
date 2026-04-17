@@ -6,11 +6,9 @@ from .aggregations.hf_papers import source as hf_papers_source
 from .aggregations.hn import source as hn_source
 from .aggregations.lobsters import source as lobsters_source
 from .aggregations.product_hunt import source as product_hunt_source
-from .aggregations.releasebot import source as releasebot_source
 from .aggregations.skills_sh import source_hot as skills_sh_hot_source
 from .aggregations.skills_sh import source_trending as skills_sh_trending_source
 from .aggregations.twitter_x import source as twitter_x_source
-from .blogs.ainews_smol import source as ainews_smol_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
 from .blogs.antirez import source as antirez_source
 from .blogs.ben_evans import source as ben_evans_source
@@ -35,20 +33,25 @@ from .blogs.openai_news import source as openai_news_source
 from .blogs.paul_graham import source as paul_graham_source
 from .blogs.pragmatic_engineer import source as pragmatic_engineer_source
 from .blogs.ramp_builders import source as ramp_builders_source
+from .blogs.sec_edgar_form_d import source as sec_edgar_form_d_source
 from .blogs.semianalysis import source as semianalysis_source
+from .blogs.sifted import source as sifted_source
 from .blogs.simon_willison import source as simon_willison_source
 from .blogs.sorrycc import source as sorrycc_source
 from .blogs.stratechery import source as stratechery_source
+from .blogs.techcrunch_fundings import source as techcrunch_fundings_source
+from .blogs.techcrunch_venture import source as techcrunch_venture_source
 from .blogs.techmeme import source as techmeme_source
 from .blogs.the_information import source as the_information_source
 from .blogs.trends_vc import source as trends_vc_source
 from .blogs.vercel_blog import source as vercel_blog_source
+from .blogs.yc_oss import source as yc_oss_source
 from .blogs.zero_one_me import source as zero_one_me_source
 
 _SOURCES: list[Source] = [
     hn_source(),
     lobsters_source(),
-    releasebot_source(),
+    # releasebot: disabled — releasebot.io SSL unreachable, JSON structure changed
     hf_papers_source(),
     github_trending_source(),
     product_hunt_source(),
@@ -84,11 +87,16 @@ _SOURCES: list[Source] = [
     techmeme_source(),
     vercel_blog_source(),
     alphasignal_last_email_source(),
-    ainews_smol_source(),
+    # ainews-smol: disabled — news.smol.ai returned 404, service shut down
     globenewswire_earnings_source(),
     no_priors_source(),
     hard_fork_source(),
     dwarkesh_podcast_source(),
+    techcrunch_venture_source(),
+    techcrunch_fundings_source(),
+    sifted_source(),
+    yc_oss_source(),
+    sec_edgar_form_d_source(),
 ]
 
 
