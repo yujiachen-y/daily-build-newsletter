@@ -27,7 +27,10 @@ description: Generate a daily article digest/newsletter by checking article-harv
 ### 3) 收集标题与元信息
 - 从 `article-harvest query archive --on YYYY-MM-DD --json` 输出中提取：标题、来源（source id）、URL、可用的权重指标（HN 分数、GitHub stars、HF 引用等）。
 - 建立”标题清单”，后续用于分类与写作。
-- **播客/大量回溯源过滤**：部分 RSS 源（hard-fork、dwarkesh-podcast、no-priors、lennys-newsletter）会回溯全部历史集（100-200 条）。仅保留最近 3 天内发布的集数，其余排除。通过 `published_at` 字段判断。
+- **播客/大量回溯源过滤**：部分 RSS 源会回溯全部历史（少则几十、多则上千条）。仅保留最近 3 天内发布的条目，其余排除。通过 `published_at` 字段判断。已知的回溯源：
+  - 播客：hard-fork、dwarkesh-podcast、no-priors、cognitive-revolution、ml-street-talk、training-data、unsupervised-learning、20vc（1000+ 条历史）、sharp-tech、zhang-xiaojun、onboard、sv101
+  - Newsletter（Substack 默认 20 条回溯）：lennys-newsletter、interconnects、import-ai、dwarkesh-blog、ahead-of-ai、last-week-in-ai
+  - 其他：anthropic-youtube（最近 15 条视频）
 
 #### 投融资专项源处理（yc-oss / sec-edgar-form-d / techcrunch-fundings / sifted）
 
@@ -46,18 +49,19 @@ description: Generate a daily article digest/newsletter by checking article-harv
 
 3. **techcrunch-fundings / techcrunch-venture / sifted / crunchbase-news**：这些是投融资新闻的主力来源，条目默认归入 Section A，写作时与 Techmeme 的融资条目合并叙述，避免同一融资轮在不同源的报道之间重复。
 
-#### Digest 源内容提取（ainews-smol / alphasignal-last-email）
+#### Digest 源内容提取（ainews-smol / alphasignal-last-email / the-batch）
 
-这两个源的每日条目是**汇总型日报**，标题不代表内容（ainews-smol 的标题永远是 “not much happened today”，这是一个 catchphrase）。实际内容存储在 `content.md` 中，包含大量结构化的子条目（新闻、论文、项目等）。
+这些源的单期条目是**汇总型日报/周报**，标题不代表内容（ainews-smol 的标题永远是 "not much happened today"，这是一个 catchphrase）。实际内容存储在 `content.md` 中，包含大量结构化的子条目（新闻、论文、项目等）。
 
 处理流程：
-1. 从 archive query 结果中找到 `has_content: true` 的 ainews-smol 和 alphasignal-last-email 条目。
+1. 从 archive query 结果中找到 `has_content: true` 的 ainews-smol、alphasignal-last-email、the-batch 条目。
 2. 读取其 `content_path` 对应的文件（路径为 `modules/article-harvest/data/{content_path}`）。
 3. 解析内容，提取有价值的子条目：
-   - **ainews-smol**：内容约 20-30K 字符，按 “AI Twitter Recap” / “AI Reddit Recap” 等分区，每条有标题、URL、活跃度和讨论摘要。重点关注高活跃度（>500）的条目和被多个子区重复提及的话题。
-   - **alphasignal-last-email**：内容约 10K 字符，按 “Top News” / “Top Paper” / “Signals” 分区，每条有标题链接和简要描述。”Top Paper” 中的论文应归入 Section C。
-4. 将提取的子条目加入标题清单，标注来源为 `ainews-smol:extracted` 或 `alphasignal:extracted`，参与后续分类。
-5. **不要在正文中直接引用 ainews-smol 或 alphasignal 作为信息来源**——它们是二手聚合源，提取出的子条目应追溯到原始出处。
+   - **ainews-smol**：内容约 20-30K 字符，按 "AI Twitter Recap" / "AI Reddit Recap" 等分区，每条有标题、URL、活跃度和讨论摘要。重点关注高活跃度（>500）的条目和被多个子区重复提及的话题。
+   - **alphasignal-last-email**：内容约 10K 字符，按 "Top News" / "Top Paper" / "Signals" 分区，每条有标题链接和简要描述。"Top Paper" 中的论文应归入 Section C。
+   - **the-batch**（DeepLearning.AI 周报）：每期由 Andrew Ng 的 editorial 开篇 + 多条 AI 新闻摘要组成。editorial 本身适合归入 Section D（深度文章）；新闻摘要中的高价值条目（模型发布、行业事件、政策动态）可提取后参与分类。周报节奏，非每日更新。
+4. 将提取的子条目加入标题清单，标注来源为 `ainews-smol:extracted` / `alphasignal:extracted` / `the-batch:extracted`，参与后续分类。
+5. **不要在正文中直接引用这些 digest 源作为信息来源**——它们是二手聚合源，提取出的子条目应追溯到原始出处。the-batch 的 Andrew Ng editorial 是例外，可以作为观点来源直接引用。
 
 ### 4) 近 7 天去重（选题前置）
 - 在仓库根目录的 `assets/` 下查找过去 7 天的文件夹（YYYY-MM-DD）。
@@ -161,10 +165,16 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **yc-oss 作为背景信息**：不直接写"yc-oss 显示..."，而是在提及 YC 公司时补充批次和方向信息（如"该公司来自 YC W2026 批次"）。
 - **Sifted 的欧洲视角**：Sifted 覆盖欧洲创投，与美国源互补。在融资速览中注明地理区域以帮助读者区分。
 
-#### Twitter/X 内容处理原则
-- **权重排序**：Twitter/X 条目使用 likes + retweets 作为权重信号（而非 HN 分数），按 engagement 从高到低排序。
-- **展开时必须补充上下文**：推文本身通常信息量有限（短文本、碎片化），展开写作时需要通过 WebFetch 原推或相关链接获取完整背景，避免只复述推文文字。
-- **归类**：Twitter/X 条目默认归入 Section (a) HN/其他网站，但如果推文内容实质上是某个 GitHub 项目或学术论文的讨论，应归入对应 Section。
+#### 播客源处理原则（20VC / Dwarkesh / Latent Space / Sharp Tech / OnBoard! 等）
+- **默认归类**：播客条目归入 Section (a) HN/其他网站。但若本期主题明显是某篇论文讨论，可归 Section (c)；若是某 GitHub 项目讨论，归 Section (b)。
+- **展开时必须打开 show notes**：播客 RSS 的 title 通常只写主持人 + 嘉宾，看不出本期实际讨论了什么。要展开写，必须 WebFetch episode URL 或 summary 字段，抽出 3-5 个本期关键话题点。纯标题复述（如"20VC：Harry 采访 XXX"）零信息增量，宁可省略。
+- **中文播客（zhang-xiaojun / onboard / sv101）**：内容通常深度较高，适合作为 Section D 的候选。注意本期可能是多嘉宾访谈，要区分嘉宾各自的观点。
+- **播客 URL 可能是音频文件**（Training Data 的 Megaphone feed 每条 url 指向 `.mp3`）。这种情况下 WebFetch 音频无意义，需基于 RSS summary/description 字段写作。
+
+#### Newsletter 源处理原则（Interconnects / Import AI / Ahead of AI / Last Week in AI / The Batch）
+- **归类倾向 Section D**：这些 Substack/周刊以长文分析或观点聚合为主（Interconnects 是 Nathan Lambert 的 RL/open model 评论，Import AI 是 Jack Clark 的周度 AI 洞察，Ahead of AI 是 Sebastian Raschka 的 ML 技术解析，Last Week in AI 是周度新闻汇总，The Batch 是 DeepLearning.AI 的 Andrew Ng editorial + 新闻摘要）。
+- **Last Week in AI 和 The Batch 是 digest 型**：单期含多条子新闻，按上面 "Digest 源内容提取" 的流程处理，提取子条目后参与分类。
+- **周刊节奏**：这些源每周 1-3 篇，不是每日都有更新。无更新时不要硬凑篇幅。
 
 #### 付费墙源处理原则（SemiAnalysis / The Information 等）
 - **优先使用 RSS 摘要**：这类源的正文通常有付费墙保护，WebFetch 大概率无法获取完整内容。优先基于 RSS 提供的标题和摘要撰写。
