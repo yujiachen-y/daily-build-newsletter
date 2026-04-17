@@ -19,7 +19,7 @@ def make_rss_source(
     feed_url: str,
     *,
     html_to_markdown: Callable[[str], str] | None = None,
-    max_age_days: int | None = None,
+    max_age_days: int | None = 90,
 ) -> Source:
     return Source(
         id=source_id,
@@ -43,6 +43,8 @@ def fetch_rss(
     data = feedparser.parse(get_bytes(ctx.session, feed_url))
     if data.bozo:
         raise FetchError(f"RSS parse error for {feed_url}")
+    if not data.entries:
+        raise FetchError(f"RSS feed empty for {feed_url}")
 
     cutoff = ctx.now - timedelta(days=max_age_days) if max_age_days else None
 
@@ -76,8 +78,6 @@ def fetch_rss(
                 content_markdown=content_markdown,
             )
         )
-    if not items:
-        raise FetchError(f"RSS feed empty for {feed_url}")
     return items
 
 

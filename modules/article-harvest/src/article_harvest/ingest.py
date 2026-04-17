@@ -38,7 +38,11 @@ def _run_ingest(storage: Storage, sources: list[Source]) -> dict:
         try:
             items = source.fetch(ctx)
             if not items:
-                raise FetchError("no items returned")
+                if source.kind == "aggregation":
+                    raise FetchError("no items returned")
+                # Blog RSS: empty after cutoff filter is a legitimate "no new episodes".
+                successes.append({"source_id": source.id, "stored": 0, "fetched": 0})
+                continue
             if source.kind == "aggregation":
                 storage.save_snapshot(source, items)
                 if sqlite_enabled:

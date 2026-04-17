@@ -27,10 +27,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 ### 3) 收集标题与元信息
 - 从 `article-harvest query archive --on YYYY-MM-DD --json` 输出中提取：标题、来源（source id）、URL、可用的权重指标（HN 分数、GitHub stars、HF 引用等）。
 - 建立”标题清单”，后续用于分类与写作。
-- **播客/大量回溯源过滤**：部分 RSS 源会回溯全部历史（少则几十、多则上千条）。仅保留最近 3 天内发布的条目，其余排除。通过 `published_at` 字段判断。已知的回溯源：
-  - 播客：hard-fork、dwarkesh-podcast、no-priors、cognitive-revolution、ml-street-talk、training-data、unsupervised-learning、20vc（1000+ 条历史）、sharp-tech、zhang-xiaojun、onboard、sv101
-  - Newsletter（Substack 默认 20 条回溯）：lennys-newsletter、interconnects、import-ai、dwarkesh-blog、ahead-of-ai、last-week-in-ai
-  - 其他：anthropic-youtube（最近 15 条视频）
+- **新鲜度原则（fetch 层已做 90 天过滤）**：`make_rss_source` 的 `max_age_days` 默认值是 90 天，fetch 层只返回近 90 天发布的条目。所以不再需要在 agent 层按源手动过滤爆仓。但首次 ingest 某新源时，仍会把近 90 天的旧文章的 `archived_at` 标为今天。**日报展开/分析时只选 `published_at` 在近 3 天内的条目**；更早的条目（30-90 天前发布但今天才入库）只在分类文件中作为归档列表，不写入 summary.md。慢节奏源（lilian-weng、gwern-changelog、huyen-chip、onboard 等）90 天内可能无新发布，返回 0 是正常状态。
 
 #### 投融资专项源处理（yc-oss / sec-edgar-form-d / techcrunch-fundings / sifted）
 
