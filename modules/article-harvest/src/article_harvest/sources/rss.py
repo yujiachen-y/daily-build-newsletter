@@ -49,7 +49,7 @@ def fetch_rss(
     items: list[BlogItem] = []
     for entry in data.entries[:limit]:
         title = entry.get("title")
-        link = entry.get("link")
+        link = entry.get("link") or _extract_enclosure_link(entry)
         if not title or not link:
             continue
         published = entry.get("published") or entry.get("updated")
@@ -100,3 +100,15 @@ def _extract_content_html(entry: Any) -> str | None:
         if isinstance(candidate, dict) and candidate.get("value"):
             return str(candidate.get("value"))
     return entry.get("summary")
+
+
+def _extract_enclosure_link(entry: Any) -> str | None:
+    """Fall back to the first enclosure URL for podcast feeds that omit per-item <link>."""
+    enclosures = entry.get("enclosures")
+    if isinstance(enclosures, list) and enclosures:
+        candidate = enclosures[0]
+        if isinstance(candidate, dict):
+            href = candidate.get("href") or candidate.get("url")
+            if href:
+                return str(href)
+    return None
