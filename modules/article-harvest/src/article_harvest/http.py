@@ -4,7 +4,7 @@ from typing import Any
 
 import requests
 
-USER_AGENT = "article-harvest/0.1 (+local)"
+USER_AGENT = "article-harvest/0.1 (jiachen@daily-build-newsletter)"
 
 
 def create_session() -> requests.Session:

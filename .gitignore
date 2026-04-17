@@ -14,3 +14,6 @@ __pycache__/
 *.egg-info/
 *.local.json
 .env.local
+
+.DS_Store
+.agent/skills/*/memory/
