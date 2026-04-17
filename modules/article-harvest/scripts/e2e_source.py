@@ -53,7 +53,9 @@ def _run_ingest(source_id: str) -> bool:
         print(f"[e2e] source {source_id} reported failure", file=sys.stderr)
         return False
     successes = report.get("successes") or []
-    if not any(entry.get("source_id") == source_id for entry in successes if isinstance(entry, dict)):
+    if not any(
+        entry.get("source_id") == source_id for entry in successes if isinstance(entry, dict)
+    ):
         print(f"[e2e] source {source_id} missing success record", file=sys.stderr)
         return False
     return True
