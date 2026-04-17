@@ -27,6 +27,24 @@ description: Generate a daily article digest/newsletter by checking article-harv
 ### 3) 收集标题与元信息
 - 从 `article-harvest query archive --on YYYY-MM-DD --json` 输出中提取：标题、来源（source id）、URL、可用的权重指标（HN 分数、GitHub stars、HF 引用等）。
 - 建立”标题清单”，后续用于分类与写作。
+- **播客/大量回溯源过滤**：部分 RSS 源（hard-fork、dwarkesh-podcast、no-priors、lennys-newsletter）会回溯全部历史集（100-200 条）。仅保留最近 3 天内发布的集数，其余排除。通过 `published_at` 字段判断。
+
+#### 投融资专项源处理（yc-oss / sec-edgar-form-d / techcrunch-fundings / sifted）
+
+这些源需要特殊处理：
+
+1. **yc-oss**（YC 公司结构化数据）：每次抓取返回数百家公司。**不要逐一列出**。处理策略：
+   - 识别当前最新批次（如 “Winter 2026”），仅关注该批次的公司。
+   - 与其他源交叉验证：如果某 YC 公司同时出现在 HN/TechCrunch/Sifted，则在对应 Section 中提及其 YC 背景。
+   - 若 TechCrunch 有 Demo Day 报道，优先引用该报道而非 yc-oss 原始列表。
+   - 在分类文件中可附上当前批次的公司计数和重点方向作为背景信息。
+
+2. **sec-edgar-form-d**（SEC 私募融资披露）：原始监管文件，标题格式为 “Company — Form D”。处理策略：
+   - 与当日其他融资新闻交叉比对——如果某公司的 Form D 出现但尚无媒体报道，这是**独家信号**，值得在正文中提及。
+   - 若 TechCrunch/Crunchbase 已报道同一融资轮，则 Form D 仅作为验证数据，不需要单独提及。
+   - 无法通过 WebFetch 获取更多信息时，仅以”SEC 备案显示 XXX 完成新一轮融资”形式简要提及。
+
+3. **techcrunch-fundings / techcrunch-venture / sifted / crunchbase-news**：这些是投融资新闻的主力来源，条目默认归入 Section A，写作时与 Techmeme 的融资条目合并叙述，避免同一融资轮在不同源的报道之间重复。
 
 #### Digest 源内容提取（ainews-smol / alphasignal-last-email）
 
@@ -45,6 +63,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - 在仓库根目录的 `assets/` 下查找过去 7 天的文件夹（YYYY-MM-DD）。
 - 读取这些日期的 `summary.md` 与四个分类文件，建立已报道标题/URL 列表。
 - 如发现重复：优先保留今日条目中更新更显著或权重更高的版本，其他条目从今日清单移除，并在写作时避免重复叙述。
+- **去重标注必须机械验证**：在分类文件中将条目标注为"去重/已报道"之前，必须用 Grep 在历史 `summary.md` 中搜索该条目的关键实体（人名、公司名、项目名）确认确实出现过。禁止凭上下文中的印象判断——长上下文中同时持有今日抓取数据和历史 summary 时，极易将今日条目的标题与历史内容混淆，导致虚假去重（把新内容错误标记为已报道）。
 
 ### 5) 分类（按权重排序）
 将去重后的条目按以下四类归档，并在每类内部按”权重”排序（若无权重则按重要性/影响力/来源知名度排序）：
@@ -62,7 +81,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - 来自 HN / Lobsters 等源但 URL 指向上述论文平台的条目
 - **GitHub Repo（Section B）**：URL 指向 github.com 的仓库页面（排除论文类 GitHub 页面如 awesome-xxx-papers）。
 - **深度文章（Section D）**：具备长文/深度解析特征（标题、来源、摘要判断）。
-- **HN/其他网站（Section A）**：不属于以上三类的所有条目。
+- **HN/其他网站（Section A）**：不属于以上三类的所有条目。包括投融资新闻（来自 techcrunch-venture、techcrunch-fundings、sifted、crunchbase-news、sec-edgar-form-d、techmeme 中的融资条目）。
 - 若条目匹配多个分类，选择最贴合的一类，保证分类互斥。
 
 ### 6) 写入分类文件
@@ -97,7 +116,18 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - 避免与过去 7 天内容重复。
 
 ### 8) 生成汇总文章
-- 在 `assets/YYYY-MM-DD/summary.md` 创建汇总稿，包含：
+- 在 `assets/YYYY-MM-DD/summary.md` 创建汇总稿，**目标长度 ~120 实质内容行**。
+- **"一行"的定义**：一条新闻/话题 = 一个自然段落 = 一行。高价值条目的段落可以包含 2-4 句话（提供超越标题的分析），但同一条新闻不得拆成多个段落。用 `grep -cv '^\s*$\|^#\|^---' summary.md` 计算实质行数。
+- **禁止的凑行手段**：
+  - 把同一条新闻拆成 2-3 个段落（如"背景段 + 分析段 + 影响段"）
+  - 用空行、分隔线、重复的引导语凑数
+  - 物理换行拆分长段落
+- **正确的扩充策略**（当初稿不足 120 行时）：
+  - 增加覆盖面：更多 Lobsters/HN 速览条目、更多 AINews 提炼子条目
+  - 增加颗粒度：Section C 的论文各给独立一行描述，而非 9 篇挤在一行
+  - 增加分析深度：对高权重条目补充 WebFetch 后的技术细节或社区反应
+  - 补充未被覆盖的 Techmeme/The Information 条目
+- 汇总稿包含：
   - 开头整体 Summary（150–200 字中文，概览今日四类亮点）。
   - 四个 Section（与上面四类一致），每个 Section 放入对应的 ~400 字小文章。
 
@@ -123,6 +153,13 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **Releasebot、Product Hunt 和 GlobeNewswire Earnings 默认不出现在正文中**。这些来源的条目绝大多数是常规版本更新、早期产品发布或例行财报披露，以纯名称列表形式出现时零信息增量。
 - **例外**：如果某条内容具有行业影响力（如重大框架发布、知名产品重大版本、重大科技公司业绩超预期/暴雷），可以提升到正文中，但必须附带实质描述，不能只列名称。
 - 仅在分类文件（`a-hn-and-others.md`）中保留完整列表作为归档记录。
+
+#### 投融资源处理原则（TechCrunch / Sifted / Crunchbase / SEC EDGAR / yc-oss）
+- **融资新闻合并叙述**：同一融资轮可能同时出现在 techcrunch-venture、techcrunch-fundings、sifted、crunchbase-news、techmeme 中。以信息最丰富的版本为主，其余去重。
+- **融资速览使用列表格式**：当单日融资新闻超过 3 条时，用 Markdown 列表逐条列出（公司名、金额、估值、领投方），不需要每条都写段落。仅对 1-2 条有行业意义的融资展开分析。
+- **SEC EDGAR Form D 的独家价值**：如果某公司仅出现在 Form D 而无媒体报道，简要提及"SEC 备案显示..."——这是其他日报没有的信息增量。若已有媒体报道则不单独提及。
+- **yc-oss 作为背景信息**：不直接写"yc-oss 显示..."，而是在提及 YC 公司时补充批次和方向信息（如"该公司来自 YC W2026 批次"）。
+- **Sifted 的欧洲视角**：Sifted 覆盖欧洲创投，与美国源互补。在融资速览中注明地理区域以帮助读者区分。
 
 #### Twitter/X 内容处理原则
 - **权重排序**：Twitter/X 条目使用 likes + retweets 作为权重信号（而非 HN 分数），按 engagement 从高到低排序。
