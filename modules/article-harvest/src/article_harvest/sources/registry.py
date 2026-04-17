@@ -8,7 +8,6 @@ from .aggregations.lobsters import source as lobsters_source
 from .aggregations.product_hunt import source as product_hunt_source
 from .aggregations.skills_sh import source_hot as skills_sh_hot_source
 from .aggregations.skills_sh import source_trending as skills_sh_trending_source
-from .aggregations.twitter_x import source as twitter_x_source
 from .blogs.ahead_of_ai import source as ahead_of_ai_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
 from .blogs.anthropic_youtube import source as anthropic_youtube_source
@@ -74,7 +73,6 @@ _SOURCES: list[Source] = [
     product_hunt_source(),
     skills_sh_trending_source(),
     skills_sh_hot_source(),
-    twitter_x_source(),
     zero_one_me_source(),
     antirez_source(),
     ben_evans_source(),
