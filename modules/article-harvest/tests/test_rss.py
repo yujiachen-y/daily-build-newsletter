@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from article_harvest.models import FetchContext
-from article_harvest.sources.rss import fetch_rss
+from article_harvest.sources.rss import fetch_rss, make_rss_source
 
 
 class DummySession:
@@ -61,3 +61,18 @@ def test_fetch_rss_no_max_age_keeps_all():
     ctx = FetchContext(session=session, run_id="run", now=datetime(2030, 1, 1))
     items = fetch_rss(ctx, "https://example.com/feed")
     assert len(items) == 1
+
+
+def test_make_rss_source_default_cutoff_is_90_days():
+    fixture = Path(__file__).parent / "fixtures" / "rss_sample.xml"
+    payload = fixture.read_bytes()
+    session = DummySession(payload)
+    src = make_rss_source("sample", "Sample", "https://example.com/feed")
+
+    # Fixture article is from 2026-01-13; within 90 days of 2026-03-01.
+    within = FetchContext(session=session, run_id="run", now=datetime(2026, 3, 1))
+    assert len(src.fetch(within)) == 1
+
+    # 120 days later is outside the default cutoff.
+    beyond = FetchContext(session=session, run_id="run", now=datetime(2026, 5, 15))
+    assert src.fetch(beyond) == []
