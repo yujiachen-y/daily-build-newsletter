@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from article_harvest.models import FetchContext
+from article_harvest.sources.blogs.alignment_anthropic import fetch_alignment_anthropic
 from article_harvest.sources.blogs.alphasignal_last_email import (
     _cleanup_markdown,
     _collapse_blank_lines,
@@ -108,6 +109,39 @@ def test_fetch_openai_dev_blog():
     assert len(items) == 2
     assert items[0].title == "OpenAI Feature"
     assert "new feature" in items[0].content_markdown.lower()
+
+
+# -- Alignment Anthropic --
+
+
+_ALIGNMENT_LISTING = """\
+<html><body><main>
+  <h2>Articles</h2>
+  <div class="date">April 2026</div>
+  <a href="2026/automated-w2s/" class="note"><h3>Automated Weak-to-Strong</h3></a>
+  <div class="date">March 2026</div>
+  <a href="2026/abstractive-red-teaming/" class="note"><h3>Abstractive Red-Teaming</h3></a>
+  <a href="https://arxiv.org/abs/2506.18032" class="paper"><h3>External Paper Title</h3></a>
+</main></body></html>"""
+
+
+def test_fetch_alignment_anthropic():
+    session = _DummySession(
+        responses={"https://alignment.anthropic.com/": _DummyResponse(text=_ALIGNMENT_LISTING)},
+    )
+    items = fetch_alignment_anthropic(_ctx(session))
+    assert len(items) == 3
+
+    internal = items[0]
+    assert internal.url == "https://alignment.anthropic.com/2026/automated-w2s/"
+    assert internal.title == "Automated Weak-to-Strong"
+    assert internal.published_at == "2026-04-01"
+    assert internal.content_markdown is None
+
+    external = items[2]
+    assert external.url == "https://arxiv.org/abs/2506.18032"
+    assert external.title == "External Paper Title"
+    assert external.published_at == "2026-03-01"
 
 
 # -- AlphaSignal helpers --

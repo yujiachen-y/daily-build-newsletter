@@ -9,6 +9,7 @@ from .aggregations.product_hunt import source as product_hunt_source
 from .aggregations.skills_sh import source_hot as skills_sh_hot_source
 from .aggregations.skills_sh import source_trending as skills_sh_trending_source
 from .blogs.ahead_of_ai import source as ahead_of_ai_source
+from .blogs.alignment_anthropic import source as alignment_anthropic_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
 from .blogs.anthropic_youtube import source as anthropic_youtube_source
 from .blogs.antirez import source as antirez_source
@@ -121,6 +122,7 @@ _SOURCES: list[Source] = [
     import_ai_source(),
     ahead_of_ai_source(),
     last_week_in_ai_source(),
+    alignment_anthropic_source(),
     anthropic_youtube_source(),
     arxiv_cs_ai_source(),
     the_batch_source(),
