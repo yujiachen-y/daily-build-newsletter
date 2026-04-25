@@ -14,6 +14,7 @@ from .blogs.alphasignal_last_email import source as alphasignal_last_email_sourc
 from .blogs.anthropic_youtube import source as anthropic_youtube_source
 from .blogs.antirez import source as antirez_source
 from .blogs.arxiv_cs_ai import source as arxiv_cs_ai_source
+from .blogs.arxiv_cs_ro import source as arxiv_cs_ro_source
 from .blogs.ben_evans import source as ben_evans_source
 from .blogs.claude_blog import source as claude_blog_source
 from .blogs.cognitive_revolution import source as cognitive_revolution_source
@@ -27,6 +28,7 @@ from .blogs.gwern_changelog import source as gwern_changelog_source
 from .blogs.hard_fork import source as hard_fork_source
 from .blogs.hf_blog import source as hf_blog_source
 from .blogs.huyen_chip import source as huyen_chip_source
+from .blogs.ieee_spectrum_robotics import source as ieee_spectrum_robotics_source
 from .blogs.import_ai import source as import_ai_source
 from .blogs.interconnects import source as interconnects_source
 from .blogs.last_week_in_ai import source as last_week_in_ai_source
@@ -37,12 +39,16 @@ from .blogs.lucumr import source as lucumr_source
 from .blogs.mailchimp_archive import source as mailchimp_archive_source
 from .blogs.ml_street_talk import source as ml_street_talk_source
 from .blogs.no_priors import source as no_priors_source
+from .blogs.nvidia_robotics import source as nvidia_robotics_source
 from .blogs.onboard import source as onboard_source
 from .blogs.openai_dev_blog import source as openai_dev_blog_source
 from .blogs.openai_news import source as openai_news_source
 from .blogs.paul_graham import source as paul_graham_source
+from .blogs.physical_intelligence import source as physical_intelligence_source
 from .blogs.pragmatic_engineer import source as pragmatic_engineer_source
 from .blogs.ramp_builders import source as ramp_builders_source
+from .blogs.robohub import source as robohub_source
+from .blogs.robot_report import source as robot_report_source
 from .blogs.sec_edgar_form_d import source as sec_edgar_form_d_source
 from .blogs.semianalysis import source as semianalysis_source
 from .blogs.sharp_tech import source as sharp_tech_source
@@ -125,6 +131,12 @@ _SOURCES: list[Source] = [
     alignment_anthropic_source(),
     anthropic_youtube_source(),
     arxiv_cs_ai_source(),
+    arxiv_cs_ro_source(),
+    physical_intelligence_source(),
+    nvidia_robotics_source(),
+    robot_report_source(),
+    ieee_spectrum_robotics_source(),
+    robohub_source(),
     the_batch_source(),
     techcrunch_venture_source(),
     techcrunch_fundings_source(),

@@ -14,6 +14,7 @@ from article_harvest.sources.blogs.alphasignal_last_email import (
 from article_harvest.sources.blogs.claude_blog import fetch_claude_blog
 from article_harvest.sources.blogs.founders_fund_anatomy import fetch_founders_fund
 from article_harvest.sources.blogs.openai_dev_blog import fetch_openai_dev_blog
+from article_harvest.sources.blogs.physical_intelligence import fetch_physical_intelligence
 
 # -- helpers --
 
@@ -142,6 +143,48 @@ def test_fetch_alignment_anthropic():
     assert external.url == "https://arxiv.org/abs/2506.18032"
     assert external.title == "External Paper Title"
     assert external.published_at == "2026-03-01"
+
+
+# -- Physical Intelligence --
+
+
+_PI_LISTING = """\
+<html><body><main>
+  <a href="/blog/pi07">
+    <div>
+      <div title="π0.7: a Steerable Model with Emergent Capabilities">
+        <span>π</span><sub>0.7</sub>: a Steerable Model with Emergent Capabilities
+      </div>
+      <div>April 16, 2026</div>
+    </div>
+    <p>A steerable robotic foundation model.</p>
+  </a>
+  <a href="/blog/openpi">
+    <div>
+      <div title="Open Sourcing π0">Open Sourcing π0</div>
+      <div>February 4, 2025</div>
+    </div>
+  </a>
+  <a href="/blog/page-abc123">Build artifact link</a>
+  <a href="/blog/openpi">Duplicate slug</a>
+</main></body></html>"""
+
+
+def test_fetch_physical_intelligence():
+    pi_url = "https://www.physicalintelligence.company/blog"
+    session = _DummySession(responses={pi_url: _DummyResponse(text=_PI_LISTING)})
+    items = fetch_physical_intelligence(_ctx(session))
+    assert len(items) == 2
+
+    first = items[0]
+    assert first.url == "https://www.physicalintelligence.company/blog/pi07"
+    assert first.title == "π0.7: a Steerable Model with Emergent Capabilities"
+    assert first.published_at == "2026-04-16"
+
+    second = items[1]
+    assert second.url == "https://www.physicalintelligence.company/blog/openpi"
+    assert second.title == "Open Sourcing π0"
+    assert second.published_at == "2025-02-04"
 
 
 # -- AlphaSignal helpers --

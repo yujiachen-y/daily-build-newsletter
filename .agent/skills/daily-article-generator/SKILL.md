@@ -168,6 +168,15 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **中文播客（zhang-xiaojun / onboard / sv101）**：内容通常深度较高，适合作为 Section D 的候选。注意本期可能是多嘉宾访谈，要区分嘉宾各自的观点。
 - **播客 URL 可能是音频文件**（Training Data 的 Megaphone feed 每条 url 指向 `.mp3`）。这种情况下 WebFetch 音频无意义，需基于 RSS summary/description 字段写作。
 
+#### 具身智能 / 机器人源处理原则（arxiv-cs-ro / physical-intelligence / nvidia-robotics / the-robot-report / ieee-spectrum-robotics / robohub）
+- **默认归类**：
+  - `arxiv-cs-ro` → Section C，与 `arxiv-cs-ai` 同套处理（每次 30 篇，仅挑 2-3 篇展开，其余作归档列表）。优先选有"VLA / 具身基础模型 / 仿真到真机迁移 / 长程操作"等强叙事的论文。
+  - `physical-intelligence` → Section D。该源每几个月才发一篇，但每篇都是 SOTA 发布（π0 / π0.5 / π0.7 等），属高信号必展开，不得仅作列表项一笔带过。
+  - `nvidia-robotics`、`the-robot-report`、`ieee-spectrum-robotics`、`robohub` → 默认 Section A。
+- **跨源融合叙述**：NVIDIA Isaac/GR00T 发布、Figure/1X 新模型、Boston Dynamics 演示等同一事件常同时出现在多个机器人源 + Techmeme + HF Papers。按"投融资合并叙述"原则处理：以信息最丰富的版本为主，其余去重，避免在 Section A 内重复同一事件。
+- **`robohub` 的播客条目**：标题形如 "Robot Talk Episode XXX"，套用上文"播客源处理原则"——必须 WebFetch show notes 抽 3-5 个本期话题点，纯标题复述零信息增量。
+- **学术-产业重叠**：一篇 arxiv-cs-ro 论文若被某机器人公司（PI / Skild / Figure 等）官方博客同步发布，归 Section D 走产业视角，不在 Section C 重复列出 arxiv 链接。
+
 #### Newsletter 源处理原则（Interconnects / Import AI / Ahead of AI / Last Week in AI / The Batch）
 - **归类倾向 Section D**：这些 Substack/周刊以长文分析或观点聚合为主（Interconnects 是 Nathan Lambert 的 RL/open model 评论，Import AI 是 Jack Clark 的周度 AI 洞察，Ahead of AI 是 Sebastian Raschka 的 ML 技术解析，Last Week in AI 是周度新闻汇总，The Batch 是 DeepLearning.AI 的 Andrew Ng editorial + 新闻摘要）。
 - **Last Week in AI 和 The Batch 是 digest 型**：单期含多条子新闻，按上面 "Digest 源内容提取" 的流程处理，提取子条目后参与分类。
