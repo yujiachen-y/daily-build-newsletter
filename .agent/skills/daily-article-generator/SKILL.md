@@ -184,8 +184,46 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **其余存量项目的 star 数据下沉到文末「去重说明」**，作为数据参考而非正文内容。
 - **退出 Trending 的项目**：简要列出退出项目名称和原因即可，不需要每个都附 star 数。
 
-### 9) 收尾
+### 9) 事实性审查（Fact-check）
+
+summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查。主 agent 在长上下文里同时持有"今日 harvest + 过去 7 天历史 + 训练记忆"时，极易出现以下高频失误：
+
+- **填空式幻觉**：基于 RSS 标题臆测正文内容（尤其 Techmeme / The Information / 付费墙源，其 `content.md` 可能只是跳转 stub，不是全文）。
+- **训练记忆替代 harvest**：HF 论文 top-N 等列表用 Claude 对"最近热门"的印象而非实际 `has_content: true` 的 hf-papers 条目。
+- **去重日期错置**："Apr X 已报道"凭印象标注，实际对应实体在别的日期或根本没出现。
+- **跨条目拼接**：同一来源的两条独立说法被拼成一句断言。
+- **WebFetch 失败但写成功**：没抓到原文却写出"展开"段落里的细节。
+
+**执行方式：独立 fact-checker subagent**
+- 用 `Task` 工具启动单个 `general-purpose` agent（**单 agent 足够**——多 agent 并投不能解决共享训练 prior 的盲区，成本收益不成比例；要加，就按"数字 / 归属 / 跨日去重"正交分工而不是并行投票）。
+- 输入给 subagent：
+  - 当天的 `summary.md` 全文
+  - 当天 `article-harvest query archive --on YYYY-MM-DD --json` 的完整输出（ground truth）
+  - 过去 7 天 `assets/YYYY-MM-*/summary.md` 路径清单
+  - 四个分类文件路径
+- 要求 subagent 独立 WebFetch 可疑 URL（**不得复用主 agent 的结论**），对每条事实断言分类：
+  - `[OK]` — harvest 或独立 WebFetch 可验证
+  - `[FIX]` — 有错但有正确版本，给出替换文本
+  - `[DROP]` — harvest 无证据且 WebFetch 失败/404，建议删除
+  - `[VERIFY-FAIL]` — 原文存在但内容无法判断，建议收紧到标题级
+  - `[DEDUP-ERROR]` — 去重日期/归属错误，给出正确日期
+
+**重点审查清单**
+- 所有数字：HN 分数、GitHub stars、SWE-Bench 跑分、估值、融资金额
+- Techmeme / The Information / SemiAnalysis 等付费或聚合源的正文展开段落
+- Section C 的论文榜单是否全部来自 hf-papers 的 `has_content: true` 条目
+- 每条"Apr X 已报道"的去重标注在对应 summary 里能否 grep 到实体
+- WebFetch 未命中却出现超越标题/RSS summary 的细节
+
+**处理 subagent 报告**
+- `[FIX]` / `[DEDUP-ERROR]` / `[VERIFY-FAIL]` 逐条按建议修改。
+- `[DROP]` **必须交叉校验**：subagent 没有主 agent 的 WebFetch cache，它的 [DROP] 可能是 false positive（主 agent 已成功 WebFetch 过）。仅当主 agent 这侧也无证据时才删除。
+- 修正后重算 `grep -cv '^\s*$\|^#\|^---' summary.md` 确认实质行数仍接近 120，必要时按 step 8 的扩充策略补行（不得用凑行手段）。
+- 若单次审查抓到 `[FIX]` + `[DROP]` ≥ 5 条，说明写作阶段整体失控，应在日报末尾或 memory 中留一条警示，下期提前警惕同类来源。
+
+### 10) 收尾
 - 返回生成的文件路径清单，并说明是否发生去重与被移除的标题。
+- 附上 fact-check 轮次结果摘要（`[FIX]`/`[DROP]`/`[DEDUP-ERROR]` 条数）。
 
 ## Assets
 - 仓库根目录 `assets/` 用于保存每日输出文件夹（YYYY-MM-DD），已加入 `.gitignore`。
