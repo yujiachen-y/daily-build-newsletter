@@ -25,6 +25,7 @@ from .blogs.founders_fund_anatomy import source as founders_fund_source
 from .blogs.fs_blog import source as fs_blog_source
 from .blogs.globenewswire_earnings import source as globenewswire_earnings_source
 from .blogs.gwern_changelog import source as gwern_changelog_source
+from .blogs.hamel import source as hamel_source
 from .blogs.hard_fork import source as hard_fork_source
 from .blogs.hf_blog import source as hf_blog_source
 from .blogs.huyen_chip import source as huyen_chip_source
@@ -87,6 +88,7 @@ _SOURCES: list[Source] = [
     fs_blog_source(),
     claude_blog_source(),
     gwern_changelog_source(),
+    hamel_source(),
     hf_blog_source(),
     huyen_chip_source(),
     latent_space_source(),
