@@ -21,6 +21,7 @@ from .blogs.cognitive_revolution import source as cognitive_revolution_source
 from .blogs.crunchbase_news import source as crunchbase_news_source
 from .blogs.dwarkesh_blog import source as dwarkesh_blog_source
 from .blogs.dwarkesh_podcast import source as dwarkesh_podcast_source
+from .blogs.eugene_yan import source as eugene_yan_source
 from .blogs.founders_fund_anatomy import source as founders_fund_source
 from .blogs.fs_blog import source as fs_blog_source
 from .blogs.globenewswire_earnings import source as globenewswire_earnings_source
@@ -117,6 +118,7 @@ _SOURCES: list[Source] = [
     hard_fork_source(),
     dwarkesh_podcast_source(),
     dwarkesh_blog_source(),
+    eugene_yan_source(),
     cognitive_revolution_source(),
     ml_street_talk_source(),
     training_data_source(),
