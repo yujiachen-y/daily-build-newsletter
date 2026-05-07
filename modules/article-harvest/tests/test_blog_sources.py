@@ -12,6 +12,7 @@ from article_harvest.sources.blogs.alphasignal_last_email import (
     _trim_preamble,
 )
 from article_harvest.sources.blogs.claude_blog import fetch_claude_blog
+from article_harvest.sources.blogs.cursor_blog import fetch_cursor_blog
 from article_harvest.sources.blogs.founders_fund_anatomy import fetch_founders_fund
 from article_harvest.sources.blogs.openai_dev_blog import fetch_openai_dev_blog
 from article_harvest.sources.blogs.physical_intelligence import fetch_physical_intelligence
@@ -79,6 +80,40 @@ def test_fetch_claude_blog():
     assert items[0].title == "The Real Title"
     assert items[0].published_at == "2026-01-15"
     assert "Interesting article content" in items[0].content_markdown
+
+
+# -- Cursor Blog --
+
+
+_CURSOR_LISTING = """\
+<html><body><main>
+  <article><a href="/blog/composer-2"><h2>Composer 2</h2></a></article>
+  <article><a href="/blog/cursor-3"><h2>Cursor 3</h2></a></article>
+  <article><a href="/blog/topic/research">Topic link</a></article>
+</main></body></html>"""
+
+_CURSOR_ARTICLE = """\
+<html><head>
+<script type="application/ld+json">
+{"@type": "BlogPosting", "datePublished": "2026-03-19T00:00:00.000Z"}
+</script>
+</head><body><article>
+  <h1>Introducing Composer 2</h1>
+  <time datetime="2026-03-19T00:00:00.000Z">Mar 19, 2026</time>
+  <p>Composer 2 is now available in Cursor with frontier-level coding ability.</p>
+</article></body></html>"""
+
+
+def test_fetch_cursor_blog():
+    session = _DummySession(
+        responses={"https://cursor.com/blog": _DummyResponse(text=_CURSOR_LISTING)},
+        default=_DummyResponse(text=_CURSOR_ARTICLE),
+    )
+    items = fetch_cursor_blog(_ctx(session))
+    assert len(items) == 2
+    assert items[0].title == "Introducing Composer 2"
+    assert items[0].published_at == "2026-03-19"
+    assert "Composer 2 is now available" in items[0].content_markdown
 
 
 # -- OpenAI Developers Blog --
