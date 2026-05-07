@@ -19,6 +19,7 @@ from .blogs.ben_evans import source as ben_evans_source
 from .blogs.claude_blog import source as claude_blog_source
 from .blogs.cognitive_revolution import source as cognitive_revolution_source
 from .blogs.crunchbase_news import source as crunchbase_news_source
+from .blogs.cursor_blog import source as cursor_blog_source
 from .blogs.dwarkesh_blog import source as dwarkesh_blog_source
 from .blogs.dwarkesh_podcast import source as dwarkesh_podcast_source
 from .blogs.eugene_yan import source as eugene_yan_source
@@ -111,6 +112,7 @@ _SOURCES: list[Source] = [
     crunchbase_news_source(),
     techmeme_source(),
     vercel_blog_source(),
+    cursor_blog_source(),
     alphasignal_last_email_source(),
     # ainews-smol: disabled — news.smol.ai returned 404, service shut down
     globenewswire_earnings_source(),
