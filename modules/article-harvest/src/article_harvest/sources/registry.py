@@ -34,6 +34,8 @@ from .blogs.huyen_chip import source as huyen_chip_source
 from .blogs.ieee_spectrum_robotics import source as ieee_spectrum_robotics_source
 from .blogs.import_ai import source as import_ai_source
 from .blogs.interconnects import source as interconnects_source
+from .blogs.jd_hodges import source as jd_hodges_source
+from .blogs.langchain_blog import source as langchain_blog_source
 from .blogs.last_week_in_ai import source as last_week_in_ai_source
 from .blogs.latent_space import source as latent_space_source
 from .blogs.lennys_newsletter import source as lennys_newsletter_source
@@ -41,6 +43,7 @@ from .blogs.lilian_weng import source as lilian_weng_source
 from .blogs.lucumr import source as lucumr_source
 from .blogs.mailchimp_archive import source as mailchimp_archive_source
 from .blogs.ml_street_talk import source as ml_street_talk_source
+from .blogs.nano_thoughts import source as nano_thoughts_source
 from .blogs.no_priors import source as no_priors_source
 from .blogs.nvidia_robotics import source as nvidia_robotics_source
 from .blogs.onboard import source as onboard_source
@@ -113,6 +116,7 @@ _SOURCES: list[Source] = [
     techmeme_source(),
     vercel_blog_source(),
     cursor_blog_source(),
+    langchain_blog_source(),
     alphasignal_last_email_source(),
     # ainews-smol: disabled — news.smol.ai returned 404, service shut down
     globenewswire_earnings_source(),
@@ -132,6 +136,8 @@ _SOURCES: list[Source] = [
     sv101_source(),
     interconnects_source(),
     import_ai_source(),
+    nano_thoughts_source(),
+    jd_hodges_source(),
     ahead_of_ai_source(),
     last_week_in_ai_source(),
     alignment_anthropic_source(),
