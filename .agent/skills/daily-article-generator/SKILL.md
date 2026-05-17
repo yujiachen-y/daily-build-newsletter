@@ -117,17 +117,20 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - 避免与过去 7 天内容重复。
 
 ### 8) 生成汇总文章
-- 在 `assets/YYYY-MM-DD/summary.md` 创建汇总稿，**目标长度 ~120 实质内容行**。
+- 在 `assets/YYYY-MM-DD/summary.md` 创建汇总稿，**目标长度 ~120 实质内容行**——这是**质量下限信号，不是写作目标**。如果只能通过列表化更多条目才能达到 120 行，说明 thesis 不足，应当回到合力判断；**宁可 100 行有合力，也不要 130 行流水账**。
 - **"一行"的定义**：一条新闻/话题 = 一个自然段落 = 一行。高价值条目的段落可以包含 2-4 句话（提供超越标题的分析），但同一条新闻不得拆成多个段落。用 `grep -cv '^\s*$\|^#\|^---' summary.md` 计算实质行数。
+- **每个 Section 需有 1-2 个贯穿性 thesis 段落**：基于本日具体事件的**合力判断**（不是抽象引导段，不是"今日 HN 呈现……"那种总结性开头），把 3-5 条相关条目整合成一个**有论点的故事**。范例（取自 2026-04-28）："OpenAI 治理重构日 = Microsoft 协议解锁 + Musk 庭审第一天 + Copilot 计费转型，三件事拼起来是自 2023 董事会风波以来最深治理重构。"——这种段落把多条独立新闻熔成一句**今天为什么是 X 日**的判断，是 summary 的真正价值所在。
+- **thesis 段落优先于速览列表**：先找当日 2-4 个跨条目主题，写成 thesis 段落；再用速览处理 thesis 消化剩下的条目。**Section 不应当全部由独立条目组成**。
 - **禁止的凑行手段**：
   - 把同一条新闻拆成 2-3 个段落（如"背景段 + 分析段 + 影响段"）
+  - 把多条相关条目拆成独立段落代替整合为 thesis（如同日 9 条 The Information 标题各写成独立一行；同一融资轮在不同源各写一行）——这是流水账，不是扩充。3+ 条相关条目应当融合成一个 thesis 段落。
   - 用空行、分隔线、重复的引导语凑数
   - 物理换行拆分长段落
-- **正确的扩充策略**（当初稿不足 120 行时）：
-  - 增加覆盖面：更多 Lobsters/HN 速览条目、更多 AINews 提炼子条目
-  - 增加颗粒度：Section C 的论文各给独立一行描述，而非 9 篇挤在一行
-  - 增加分析深度：对高权重条目补充 WebFetch 后的技术细节或社区反应
-  - 补充未被覆盖的 Techmeme/The Information 条目
+- **正确的扩充策略**（当初稿不足 120 行时，按优先级使用）：
+  - **首选：增加合力（synthesis）**——找出本日 3-5 条相关条目的共同主题，组合成 thesis 段落，给出一个"今天为什么是 X 日"的判断。这是密度最高、价值最大的扩充方式。
+  - **次选：增加分析深度**——对高权重条目补充 WebFetch 后的技术细节、社区反应、跨日对照。
+  - **再次：增加颗粒度**——Section C 的论文各给独立一行描述（仅当聚类讲已饱和、单篇有独立信息增量时使用）。
+  - **末选：增加覆盖面**——补充未被覆盖的 Techmeme / The Information / Lobsters 速览条目。**只有当前三项都饱和才用**；把同日相关条目各写成独立一行不是合力。
 - 汇总稿包含：
   - 开头整体 Summary（150–200 字中文，概览今日四类亮点）。
   - 四个 Section（与上面四类一致），每个 Section 放入对应的 ~400 字小文章。
@@ -137,7 +140,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - 例：GPT-5.2 物理学突破 → 深度文章（OpenAI 专题）；不在 HN Section 重复展开。
   - 例：moyin-creator → GitHub Section；不在 HN/Techmeme Section 重复讨论 Seedance。
 - **Summary 段落是索引而非重述**：用一两句话点出每类的核心亮点，不展开论述。
-- **各 Section 不写概述/引导段落**：直接进入第一条具体内容，不要写"今日 HN 呈现……"之类的总结性开头。读者是唯一读者，会读完全文，不需要 hook 或 preview。
+- **各 Section 不写抽象引导段落**：禁止"今日 HN 呈现……" / "本日深度阅读集中在……"这类**没有具体事件内容**的 hook / preview 写法。读者会读完全文，不需要预告。**注意区分**：上文 step 8 要求的 **thesis 段落** ≠ 抽象引导段——thesis 是具体事件的合力判断（"今日 = X 事 + Y 事 + Z 事 → A 结论"），它本身就是 Section 的核心内容；而引导段是"今日有几件大事"这种空话。区别在于**有没有点名具体事件并给出论点**。
 - **跨 Section 引用用一句话带过**：如果 Section A 的内容与 Section B 的某条新闻相关，最多用"（参见深度文章 Section）"或一句话交代关联，不重复叙述背景和细节。
 - 省出的字数用于：更深的分析、更多条目的简报覆盖、或补充未被充分报道的内容。
 - **Section 内不重复同一条目**：同一条新闻不得在同一 Section 中出现两次（如先在速览列表中提及，又在展开段落中重复）。常见陷阱：The Information 等付费源条目多，容易在"要闻提炼"列表和"主题分析"段落之间重复同一公司/事件。扩充行数时必须先搜索 Section 内已有实体名再决定是补充新条目还是合并到已有段落。
@@ -223,6 +226,7 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - Section C 的论文榜单是否全部来自 hf-papers 的 `has_content: true` 条目
 - 每条"Apr X 已报道"的去重标注在对应 summary 里能否 grep 到实体
 - WebFetch 未命中却出现超越标题/RSS summary 的细节
+- **合力（synthesis）密度审查**：每个 Section 是否至少有 1 个 thesis 段落（把 3+ 条相关条目熔成一个论点的合力判断），还是仅由独立条目段落 / bullet 列表组成？若一个 Section 全部为独立条目而无 thesis，标记为**结构性问题**（非事实错误，但写作质量回退到"流水账"），在收尾报告中提示，下期写作前重读本规则。
 
 **处理 subagent 报告**
 - `[FIX]` / `[DEDUP-ERROR]` / `[VERIFY-FAIL]` 逐条按建议修改。
@@ -230,12 +234,30 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - 修正后重算 `grep -cv '^\s*$\|^#\|^---' summary.md` 确认实质行数仍接近 120，必要时按 step 8 的扩充策略补行（不得用凑行手段）。
 - 若单次审查抓到 `[FIX]` + `[DROP]` ≥ 5 条，说明写作阶段整体失控，应在日报末尾或 memory 中留一条警示，下期提前警惕同类来源。
 
-### 10) 收尾
-- 返回生成的文件路径清单，并说明是否发生去重与被移除的标题。
+### 10) 同步到 Obsidian / iCloud（手机可查看）
+
+`summary.md` 修正完成后，复制一份到用户的 Obsidian iCloud 目录，文件名重命名为 `YYYY-MM-DD.md`，方便用户从手机 / iPad 上查看。
+
+**目录约定**：
+```
+/Users/yujiachen/Library/Mobile Documents/iCloud~md~obsidian/Documents/jiachen yu/Newsletter/Daily Build/YYYY-MM-DD.md
+```
+
+- 一级目录 `Newsletter/` 是 Obsidian 总日报目录（其他 agent 也可能并列建子目录）。
+- 二级目录 `Daily Build/` 是本日报系列专属。
+- **只复制 `summary.md` 这一个文件**，重命名为 `YYYY-MM-DD.md`；分类文件 (`a-hn-and-others.md` 等) 不上传。
+- 若 `Newsletter/Daily Build/` 不存在则用 `mkdir -p` 创建（路径包含空格，**bash 中必须加引号**）。
+- 若同名文件已存在（同日重跑），直接覆盖。
+
+完成后在收尾报告中给出 Obsidian 路径，确认 iCloud 同步路径已更新。
+
+### 11) 收尾
+- 返回生成的文件路径清单（含 Obsidian 同步路径），并说明是否发生去重与被移除的标题。
 - 附上 fact-check 轮次结果摘要（`[FIX]`/`[DROP]`/`[DEDUP-ERROR]` 条数）。
 
 ## Assets
 - 仓库根目录 `assets/` 用于保存每日输出文件夹（YYYY-MM-DD），已加入 `.gitignore`。
+- Obsidian iCloud 镜像路径：`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/jiachen yu/Newsletter/Daily Build/`（仅 `summary.md`，重命名为 `YYYY-MM-DD.md`）。
 
 ## 注意事项：路径处理
 
