@@ -116,6 +116,21 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - 选择其中 1 条重点展开（背景、意义、潜在影响）。
   - 避免与过去 7 天内容重复。
 
+#### Obsidian tag 兼容（`#数字` 模式禁用）
+- **禁止在正文里写 `#数字` 紧贴模式**：实测 Obsidian 会把 `Techmeme #25` / `HF Papers #1` / `Lobsters #13` / `Arena #13` / `PR #123` 中的 `#25` / `#1` 等解析为 tag（即使 [Obsidian docs](https://obsidian.md/help/tags) 声称纯数字 tag 无效，实际行为与 docs 不符，见 [forum bug](https://forum.obsidian.md/t/use-of-followed-by-number-is-turned-into-a-tag-by-obsidian/37099)）。用户在 5/03、5/05、5/08、5/15、5/20、5/21 的 Obsidian 同步副本里反复手动删除这些 `#`。
+- **修复方案**：直接去掉 `#`。
+  - ❌ `HF Papers #1` → ✅ `HF Papers 1`
+  - ❌ `Techmeme #25` → ✅ `Techmeme 25`
+  - ❌ `Lobsters #13` → ✅ `Lobsters 13`
+  - ❌ `Arena #13 overall` → ✅ `Arena 13 overall`
+  - ❌ `PR #123` → ✅ `PR 123`
+  - ❌ `(alphasignal #5)` → ✅ `(alphasignal 5)`
+- **不影响的写法**：
+  - markdown heading（`# Section A` / `## HN`）— `#` 后有空格，不会被解析为 tag
+  - URL 里的 fragment（`https://techmeme.com/260523/p8#a260523p8`）— 在 `[text](url)` 的 url 部分里，不会被解析为 tag
+  - 真要表达 "第 N 名" 可以用：`HF Papers rank 1` / `Techmeme 第 25 条` / `Arena overall 第 13` / `HF #1` 写成 `HF top-1`
+- **生成完 summary.md 后用 grep 自检**：`grep -nE '[A-Za-z一-龥][[:space:]]#[0-9]' summary.md`——理论上应该 0 命中。复制到 Obsidian 之前必跑这一步。
+
 ### 8) 生成汇总文章
 - 在 `assets/YYYY-MM-DD/summary.md` 创建汇总稿，**目标长度 ~120 实质内容行**——这是**质量下限信号，不是写作目标**。如果只能通过列表化更多条目才能达到 120 行，说明 thesis 不足，应当回到合力判断；**宁可 100 行有合力，也不要 130 行流水账**。
 - **"一行"的定义**：一条新闻/话题 = 一个自然段落 = 一行。高价值条目的段落可以包含 2-4 句话（提供超越标题的分析），但同一条新闻不得拆成多个段落。用 `grep -cv '^\s*$\|^#\|^---' summary.md` 计算实质行数。
@@ -248,6 +263,7 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - **只复制 `summary.md` 这一个文件**，重命名为 `YYYY-MM-DD.md`；分类文件 (`a-hn-and-others.md` 等) 不上传。
 - 若 `Newsletter/Daily Build/` 不存在则用 `mkdir -p` 创建（路径包含空格，**bash 中必须加引号**）。
 - 若同名文件已存在（同日重跑），直接覆盖。
+- **复制前必跑 `#数字` 自检**（参见 step 7 末尾的 "Obsidian tag 兼容" 规则）：`grep -nE '[A-Za-z一-龥][[:space:]]#[0-9]' summary.md` 必须 0 命中。命中则全部改成去掉 `#` 的写法（`Techmeme #25` → `Techmeme 25`），改完再复制到 Obsidian 目录。
 
 完成后在收尾报告中给出 Obsidian 路径，确认 iCloud 同步路径已更新。
 
