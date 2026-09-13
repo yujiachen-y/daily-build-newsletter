@@ -12,6 +12,7 @@ from .blogs.ahead_of_ai import source as ahead_of_ai_source
 from .blogs.alignment_anthropic import source as alignment_anthropic_source
 from .blogs.all_in import source as all_in_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
+from .blogs.anthropic_api_release_notes import source as anthropic_api_release_notes_source
 from .blogs.anthropic_youtube import source as anthropic_youtube_source
 from .blogs.antirez import source as antirez_source
 from .blogs.arxiv_cs_ai import source as arxiv_cs_ai_source
@@ -26,6 +27,17 @@ from .blogs.dwarkesh_podcast import source as dwarkesh_podcast_source
 from .blogs.eugene_yan import source as eugene_yan_source
 from .blogs.founders_fund_anatomy import source as founders_fund_source
 from .blogs.fs_blog import source as fs_blog_source
+from .blogs.github_releases import (
+    claude_code_releases_source,
+    codex_releases_source,
+    deepseek_harness_releases_source,
+    hyperframes_releases_source,
+    kimi_code_releases_source,
+    openai_node_releases_source,
+    openclaw_releases_source,
+    pi_releases_source,
+)
+from .blogs.github_rfcs import claude_code_rfcs_source, pi_rfcs_source
 from .blogs.globenewswire_earnings import source as globenewswire_earnings_source
 from .blogs.gwern_changelog import source as gwern_changelog_source
 from .blogs.hamel import source as hamel_source
@@ -163,6 +175,19 @@ _SOURCES: list[Source] = [
     yc_oss_source(),
     sec_edgar_form_d_source(),
     kr36_motif_source(),
+    # 上游依赖跟踪（日报「上游动态」小节）
+    codex_releases_source(),
+    openclaw_releases_source(),
+    pi_releases_source(),
+    openai_node_releases_source(),
+    anthropic_api_release_notes_source(),
+    deepseek_harness_releases_source(),
+    kimi_code_releases_source(),
+    hyperframes_releases_source(),
+    claude_code_releases_source(),
+    # 维护者 RFC：上游动态里"快要来什么"的一半，需要 GITHUB_TOKEN
+    claude_code_rfcs_source(),
+    pi_rfcs_source(),
 ]
 
 
