@@ -36,6 +36,7 @@ from .blogs.ieee_spectrum_robotics import source as ieee_spectrum_robotics_sourc
 from .blogs.import_ai import source as import_ai_source
 from .blogs.interconnects import source as interconnects_source
 from .blogs.jd_hodges import source as jd_hodges_source
+from .blogs.kr36_motif import source as kr36_motif_source
 from .blogs.langchain_blog import source as langchain_blog_source
 from .blogs.last_week_in_ai import source as last_week_in_ai_source
 from .blogs.latent_space import source as latent_space_source
@@ -161,6 +162,7 @@ _SOURCES: list[Source] = [
     sifted_source(),
     yc_oss_source(),
     sec_edgar_form_d_source(),
+    kr36_motif_source(),
 ]
 
 

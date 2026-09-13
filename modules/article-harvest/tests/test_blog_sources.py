@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 from article_harvest.models import FetchContext
@@ -306,3 +307,99 @@ def test_fetch_founders_fund():
     assert items[0].content_markdown is not None
     assert "Full content" in items[0].content_markdown
     assert items[0].summary is not None
+
+
+# -- 36Kr 资情留言板 --
+
+
+# 北京时间 2026-05-26 07:30，此刻 UTC 仍是 05-25——用来锁住东八区口径。
+_KR36_PUBLISH_MS = 1779751800000
+
+
+def _kr36_page(state: dict) -> str:
+    return f"<html><body><script>window.initialState = {json.dumps(state)}</script></body></html>"
+
+
+def _kr36_listing(count: int) -> str:
+    items = [
+        {
+            "itemId": 3825834410333062 + i,
+            "templateMaterial": {
+                "widgetTitle": f"资情留言板第{183 - i}期",
+                "publishTime": _KR36_PUBLISH_MS,
+                "content": "摘要",
+                "author": "36Kr",
+            },
+        }
+        for i in range(count)
+    ]
+    return _kr36_page(
+        {"motifDetailData": {"data": {"motifArticleList": {"data": {"itemList": items}}}}}
+    )
+
+
+_KR36_ARTICLE = _kr36_page(
+    {
+        "articleDetail": {
+            "articleDetailData": {"data": {"widgetContent": "<p>求购 Anthropic 老股份额</p>"}}
+        }
+    }
+)
+
+
+def test_kr36_motif_parses_listing_and_article():
+    from article_harvest.sources.blogs.kr36_motif import KR36_MOTIF_URL, fetch_kr36_motif
+
+    session = _DummySession(
+        responses={KR36_MOTIF_URL: _DummyResponse(text=_kr36_listing(2))},
+        default=_DummyResponse(text=_KR36_ARTICLE),
+    )
+    items = fetch_kr36_motif(_ctx(session))
+
+    assert len(items) == 2
+    assert items[0].title == "资情留言板第183期"
+    assert items[0].url == "https://www.36kr.com/p/3825834410333062"
+    # UTC 会算成 05-25；36 氪按北京时间发刊，必须是 05-26
+    assert items[0].published_at == "2026-05-26"
+    assert items[0].content_markdown is not None
+    assert "Anthropic" in items[0].content_markdown
+
+
+def test_kr36_motif_caps_at_limit():
+    from article_harvest.sources.blogs.kr36_motif import (
+        KR36_MOTIF_LIMIT,
+        KR36_MOTIF_URL,
+        fetch_kr36_motif,
+    )
+
+    session = _DummySession(
+        responses={KR36_MOTIF_URL: _DummyResponse(text=_kr36_listing(20))},
+        default=_DummyResponse(text=_KR36_ARTICLE),
+    )
+    assert len(fetch_kr36_motif(_ctx(session))) == KR36_MOTIF_LIMIT
+
+
+def test_kr36_motif_keeps_item_when_article_body_missing():
+    """正文抓不到时降级为纯元信息，不能整个源 fail。"""
+    from article_harvest.sources.blogs.kr36_motif import KR36_MOTIF_URL, fetch_kr36_motif
+
+    session = _DummySession(
+        responses={KR36_MOTIF_URL: _DummyResponse(text=_kr36_listing(1))},
+        default=_DummyResponse(text="<html><body>no state here</body></html>"),
+    )
+    items = fetch_kr36_motif(_ctx(session))
+
+    assert len(items) == 1
+    assert items[0].content_markdown is None
+    assert items[0].title == "资情留言板第183期"
+
+
+def test_kr36_motif_raises_on_broken_page():
+    import pytest
+
+    from article_harvest.errors import FetchError
+    from article_harvest.sources.blogs.kr36_motif import fetch_kr36_motif
+
+    session = _DummySession(default=_DummyResponse(text="<html><body>redesigned</body></html>"))
+    with pytest.raises(FetchError):
+        fetch_kr36_motif(_ctx(session))
