@@ -63,6 +63,27 @@ def test_fetch_rss_no_max_age_keeps_all():
     assert len(items) == 1
 
 
+_ENCLOSURE_ONLY_FEED = b"""<?xml version="1.0"?>
+<rss version="2.0"><channel>
+  <title>Moonshots-style feed</title>
+  <item>
+    <title>Episode Without A Link</title>
+    <pubDate>Wed, 29 Jul 2026 20:00:00 -0000</pubDate>
+    <description>The mates discuss open weights.</description>
+    <enclosure url="https://traffic.megaphone.fm/EP275.mp3" type="audio/mpeg" length="0"/>
+  </item>
+</channel></rss>"""
+
+
+def test_fetch_rss_falls_back_to_enclosure_when_item_has_no_link():
+    """Moonshots' megaphone feed omits <link>; the mp3 enclosure is the only URL."""
+    session = DummySession(_ENCLOSURE_ONLY_FEED)
+    ctx = FetchContext(session=session, run_id="run", now=datetime(2026, 7, 30))
+    items = fetch_rss(ctx, "https://example.com/feed")
+    assert len(items) == 1
+    assert items[0].url == "https://traffic.megaphone.fm/EP275.mp3"
+
+
 def test_make_rss_source_default_cutoff_is_90_days():
     fixture = Path(__file__).parent / "fixtures" / "rss_sample.xml"
     payload = fixture.read_bytes()

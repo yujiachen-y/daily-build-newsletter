@@ -10,6 +10,7 @@ from .aggregations.skills_sh import source_hot as skills_sh_hot_source
 from .aggregations.skills_sh import source_trending as skills_sh_trending_source
 from .blogs.ahead_of_ai import source as ahead_of_ai_source
 from .blogs.alignment_anthropic import source as alignment_anthropic_source
+from .blogs.all_in import source as all_in_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
 from .blogs.anthropic_youtube import source as anthropic_youtube_source
 from .blogs.antirez import source as antirez_source
@@ -39,10 +40,12 @@ from .blogs.langchain_blog import source as langchain_blog_source
 from .blogs.last_week_in_ai import source as last_week_in_ai_source
 from .blogs.latent_space import source as latent_space_source
 from .blogs.lennys_newsletter import source as lennys_newsletter_source
+from .blogs.lex_fridman import source as lex_fridman_source
 from .blogs.lilian_weng import source as lilian_weng_source
 from .blogs.lucumr import source as lucumr_source
 from .blogs.mailchimp_archive import source as mailchimp_archive_source
 from .blogs.ml_street_talk import source as ml_street_talk_source
+from .blogs.moonshots import source as moonshots_source
 from .blogs.nano_thoughts import source as nano_thoughts_source
 from .blogs.no_priors import source as no_priors_source
 from .blogs.nvidia_robotics import source as nvidia_robotics_source
@@ -127,6 +130,9 @@ _SOURCES: list[Source] = [
     eugene_yan_source(),
     cognitive_revolution_source(),
     ml_street_talk_source(),
+    lex_fridman_source(),
+    all_in_source(),
+    moonshots_source(),
     training_data_source(),
     unsupervised_learning_source(),
     twenty_vc_source(),
