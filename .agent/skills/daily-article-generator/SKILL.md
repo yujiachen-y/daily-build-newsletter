@@ -18,9 +18,10 @@ description: Generate a daily article digest/newsletter by checking article-harv
 ### 2) 检查今日文章与爬取
 - 进入 `modules/article-harvest/` 目录。
 - 使用 `article-harvest query archive --on YYYY-MM-DD --json` 检查是否有今日文章。
-- 若没有文章，执行 `GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token --user yujiachen-y)}" article-harvest ingest`。
-  - token 只给 `claude-code-rfcs` / `pi-rfcs` 两个源用（它们要调 GitHub GraphQL），只存在于这条命令的进程环境里，不写入任何文件，也不要 echo 出来。
+- 若没有文章，执行 `GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token --user yujiachen-y)}" SUBSTACK_SID="${SUBSTACK_SID:-$(security find-generic-password -s substack-sid -w 2>/dev/null)}" article-harvest ingest`。
+  - `GITHUB_TOKEN` 只给 `claude-code-rfcs` / `pi-rfcs` 两个源用（它们要调 GitHub GraphQL）；`SUBSTACK_SID` 是 macOS 钥匙串里 `substack-sid` 条目存的订阅者 cookie，给 `make_substack_source` 的源（目前是 `pragmatic-engineer`）补付费正文。两者都只存在于这条命令的进程环境里，不写入任何文件，也不要 echo 出来。
   - 单个源失败不会让 ingest 整体失败。若 run 记录里这两个源报 `GITHUB_TOKEN not set`，是 gh 未登录或账号名变了——**其他源照常，不要因此停止生成日报**，在收尾报告里提一句即可。
+  - `SUBSTACK_SID` 取不到或已过期时**不会报错**，付费文章静默退回免费预览。ingest 后若 `pragmatic-engineer` 当日条目的 content.md 仍含 `[Read more](`，说明钥匙串条目缺失或 cookie 过期：按「付费墙源处理原则」基于摘要写，并在收尾报告里提一句让用户更新 cookie。
 - 若 ingest 失败，重试一次。
 - 若重试后依然失败，停止生成日报：
   - 查看 `modules/article-harvest/data/runs/` 的最新 run 记录或 CLI 报错信息，定位问题。
