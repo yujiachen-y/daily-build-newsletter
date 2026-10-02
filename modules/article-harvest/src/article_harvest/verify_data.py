@@ -136,9 +136,7 @@ def _verify_blog_source(
     kind = "blog"
     try:
         lines = [
-            line
-            for line in manifest_path.read_text(encoding="utf-8").splitlines()
-            if line.strip()
+            line for line in manifest_path.read_text(encoding="utf-8").splitlines() if line.strip()
         ]
     except UnicodeDecodeError:
         collector.add(

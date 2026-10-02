@@ -38,17 +38,13 @@ def test_fetch_rss_max_age_days_filters_old_articles():
     payload = fixture.read_bytes()
     session = DummySession(payload)
     # The fixture article is from 2026-01-13. Set "now" to 2026-01-14 → within 3 days.
-    ctx_recent = FetchContext(
-        session=session, run_id="run", now=datetime(2026, 1, 14)
-    )
+    ctx_recent = FetchContext(session=session, run_id="run", now=datetime(2026, 1, 14))
     items = fetch_rss(ctx_recent, "https://example.com/feed", max_age_days=3)
     assert len(items) == 1
 
     # Set "now" to 2026-02-01 → article is 19 days old, beyond 3-day cutoff.
     # Filter-layer empty returns []; the upstream ingester decides how to handle it.
-    ctx_old = FetchContext(
-        session=session, run_id="run", now=datetime(2026, 2, 1)
-    )
+    ctx_old = FetchContext(session=session, run_id="run", now=datetime(2026, 2, 1))
     items = fetch_rss(ctx_old, "https://example.com/feed", max_age_days=3)
     assert items == []
 

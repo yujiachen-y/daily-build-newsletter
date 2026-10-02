@@ -390,4 +390,3 @@ def test_extract_skills_missing_raises():
 
     with pytest.raises(Exception, match="initialSkills not found"):
         _extract_skills("<html>no data here</html>")
-
