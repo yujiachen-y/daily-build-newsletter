@@ -8,7 +8,9 @@ from .aggregations.lobsters import source as lobsters_source
 from .aggregations.product_hunt import source as product_hunt_source
 from .aggregations.skills_sh import source_hot as skills_sh_hot_source
 from .aggregations.skills_sh import source_trending as skills_sh_trending_source
+from .blogs.addy_osmani import source as addy_osmani_source
 from .blogs.ahead_of_ai import source as ahead_of_ai_source
+from .blogs.ai_native_dev import source as ai_native_dev_source
 from .blogs.alignment_anthropic import source as alignment_anthropic_source
 from .blogs.all_in import source as all_in_source
 from .blogs.alphasignal_last_email import source as alphasignal_last_email_source
@@ -27,6 +29,7 @@ from .blogs.dwarkesh_podcast import source as dwarkesh_podcast_source
 from .blogs.eugene_yan import source as eugene_yan_source
 from .blogs.founders_fund_anatomy import source as founders_fund_source
 from .blogs.fs_blog import source as fs_blog_source
+from .blogs.ghuntley import source as ghuntley_source
 from .blogs.github_releases import (
     claude_code_releases_source,
     codex_releases_source,
@@ -57,6 +60,7 @@ from .blogs.lex_fridman import source as lex_fridman_source
 from .blogs.lilian_weng import source as lilian_weng_source
 from .blogs.lucumr import source as lucumr_source
 from .blogs.mailchimp_archive import source as mailchimp_archive_source
+from .blogs.martin_fowler import source as martin_fowler_source
 from .blogs.ml_street_talk import source as ml_street_talk_source
 from .blogs.moonshots import source as moonshots_source
 from .blogs.nano_thoughts import source as nano_thoughts_source
@@ -175,6 +179,11 @@ _SOURCES: list[Source] = [
     yc_oss_source(),
     sec_edgar_form_d_source(),
     kr36_motif_source(),
+    # agentic engineering 主题台账的主力源（见 SKILL step 10）
+    addy_osmani_source(),
+    ai_native_dev_source(),
+    martin_fowler_source(),
+    ghuntley_source(),
     # 上游依赖跟踪（日报「上游动态」小节）
     codex_releases_source(),
     openclaw_releases_source(),
