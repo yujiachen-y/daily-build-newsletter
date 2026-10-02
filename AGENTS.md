@@ -6,7 +6,6 @@
 - `modules/article-harvest/src/article_harvest/`: implementation code.
 - `modules/article-harvest/tests/`: pytest tests (`test_*.py`).
 - `modules/article-harvest/data/`: local run artifacts (ignored by git).
-- `openspec/`: spec-driven development (capability specs in `openspec/specs/`, change proposals in `openspec/changes/`).
 - `editorial_workspace/`: newsletter drafts, typically named like `YYYY-MM-DD-daily-build.md`.
 - `docs/` and `scripts/`: general documentation and repo-level utilities (when present).
 
@@ -36,7 +35,6 @@ Most development happens inside a module directory (example: `modules/article-ha
 
 - Follow the existing history style: short, imperative subjects; common prefixes include `feat:`, `docs:`, `chore:`, `refactor:`.
 - PRs should include: what/why, commands run, and any relevant output paths (e.g., `modules/article-harvest/data/runs/...`).
-- For behavior/architecture changes, add an OpenSpec proposal under `openspec/changes/<change-id>/` and validate with `openspec validate <change-id> --strict`.
 
 ## (Optional) Git Hooks
 

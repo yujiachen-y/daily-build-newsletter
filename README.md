@@ -48,9 +48,6 @@ daily-build-newsletter/
 │   ├── src/article_harvest/     #   Implementation
 │   ├── tests/                   #   pytest test suite
 │   └── data/                    #   Local run artifacts (git-ignored)
-├── openspec/                    # Spec-driven development docs
-│   ├── specs/                   #   Capability specifications
-│   └── changes/                 #   Change proposals (archived)
 ├── editorial_workspace/         # Newsletter drafts (YYYY-MM-DD-*.md)
 ├── docs/                        # Reports and analysis
 └── scripts/                     # Repo-level utilities
