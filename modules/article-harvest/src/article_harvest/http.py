@@ -25,7 +25,13 @@ def get_bytes(session: requests.Session, url: str, timeout: int = 20) -> bytes:
     return response.content
 
 
-def get_json(session: requests.Session, url: str, timeout: int = 20) -> Any:
-    response = session.get(url, timeout=timeout)
+def get_json(
+    session: requests.Session,
+    url: str,
+    timeout: int = 20,
+    *,
+    cookies: dict[str, str] | None = None,
+) -> Any:
+    response = session.get(url, timeout=timeout, cookies=cookies)
     response.raise_for_status()
     return response.json()

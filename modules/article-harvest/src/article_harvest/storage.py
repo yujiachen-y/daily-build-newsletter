@@ -239,7 +239,11 @@ class Storage:
             return True
         if not new_content:
             return False
-        preview = path.read_text(encoding="utf-8")[:800]
+        existing_content = path.read_text(encoding="utf-8")
+        # Paywall preview stored earlier, now unlocked by a subscriber cookie.
+        if "[Read more](" in existing_content and "[Read more](" not in new_content:
+            return True
+        preview = existing_content[:800]
         if "|  |" in preview:
             return True
         for line in preview.splitlines():
