@@ -260,6 +260,21 @@ EOF
 - **Last Week in AI 和 The Batch 是 digest 型**：单期含多条子新闻，按上面 "Digest 源内容提取" 的流程处理，提取子条目后参与分类。
 - **周刊节奏**：这些源每周 1-3 篇，不是每日都有更新。无更新时不要硬凑篇幅。
 
+#### Agentic engineering 源处理原则（addy-osmani / ai-native-dev / martin-fowler / ghuntley）
+- **这四个源是 step 10 主题台账的主力源**，默认归 Section C。都是周更或更慢（ghuntley 90 天内只有 2 篇），
+  当日无更新是常态，不要为它们凑篇幅。
+- **`martin-fowler` 是多作者站点，feed 的 author 字段不可信**：`exploring-gen-ai/` 系列一律标成 Martin
+  Fowler，实际作者要看文章页（实测 tdd-in-the-agent-loop 是 Birgitta Böckeler，an-accidental-blackboard 与
+  refactoring-economic-benefit 是 Giles Edwards-Alexander）；`rachels-ramblings/` 的 author 是对的（Rachel
+  Laycock）。归属写错会直接带进台账。
+- **`martin-fowler` 的正文常不全**：exploring-gen-ai 条目在 feed 里只有几百字符的卡片摘要，展开前 WebFetch
+  文章页。`Fragments:` 是 Fowler 的链接短评合集（09-08 期实测 1.3 万字符），按 digest 处理，只挑与主线相关
+  的子条目并追溯原始出处；`Bliki:` 和非 AI 主题的文章只归档。
+- **`ai-native-dev` 是 Tessl 的播客**，套用上面的播客源处理原则（URL 是 buzzsprout 单集页，show notes 约
+  1.5–2K 字符）。Tessl 自己做 spec-driven 开发工具，节目里关于 spec / 软件工厂 / 不审代码的主张有利益相关，
+  写作时点明。
+- **`addy-osmani` 是全文 feed**（单篇 1.3–3.3 万字符），直接读 content.md，不需要 WebFetch。
+
 #### 付费墙源处理原则（SemiAnalysis / The Information 等）
 - **优先使用 RSS 摘要**：这类源的正文通常有付费墙保护，WebFetch 大概率无法获取完整内容。优先基于 RSS 提供的标题和摘要撰写。
 - **WebFetch 失败时不反复重试**：尝试一次即可，失败后基于已有元信息（标题、摘要、发布日期）撰写，明确标注为付费内容。
@@ -364,7 +379,26 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - 修正后重跑 step 8 的三条长度自检（行数 ≤60、字数 ≤10,000、无 >300 字单段）。**修正常常会加长正文**（补 hedge、补出处、补口径说明），因此这一步比初稿时更容易超限；超了就按 step 8 的删除顺序压缩，不得为保留细节而突破上限。
 - 若单次审查抓到 `[FIX]` + `[DROP]` ≥ 5 条，说明写作阶段整体失控，应在日报末尾或 memory 中留一条警示，下期提前警惕同类来源。
 
-### 10) 同步到 Obsidian / iCloud（手机可查看）
+### 10) 更新主题台账（Agentic Engineering）
+
+日报只做 7 天去重，跨月的线索会断。"怎么用 AI + spec / agent 把完整项目和线上系统做出来"这条线在
+2026-06 至 09 的 90 期里有 74 期关键词命中，却散在各期正文里；而且源头标题几乎不点名方法论（同期标题
+命中仅 24 条，18 条是 arxiv），讨论藏在 Claude Code / Codex 等产品名和正文里。所以台账不靠关键词过滤，
+在写完稿时由判断顺手记下。
+
+- **位置**：`assets/topics/agentic-engineering.md`。文件头定义了收录范围、标签和行格式，**每期写之前先读
+  文件头**，不要凭印象。
+- **时机**：step 9 修正完之后。台账只转述已过审查的 summary.md，不从 harvest 另起新断言，也不为台账额外
+  WebFetch。
+- **只追加，不改写**：追加到当月 `## YYYY-MM` 小节末尾（没有就新建）。旧论断被推翻或修正时，追加新条目并
+  在末尾注明"（修正 YYYY-MM-DD 条）"，不改旧行——分歧本身就是台账要留下的信息。
+- **一条 = 一个做法或论断**，不是一篇文章。同一篇里两个独立论断写两条；跟进报道只有新信息时才另起一条。
+- **限定词原样保留**：summary 里的"可能 / 据称 / 他认为 / 标题级"不许在台账里压成断言；归属照 summary
+  写，"A 转述 B"的主体是 B。
+- **链接取分类文件里的原文 URL**；论断出自 HN / Lobsters 评论区时才链讨论页。
+- **不计入 step 8 的长度约束**。当期 0 条相关就不动文件，不写占位行。
+
+### 11) 同步到 Obsidian / iCloud（手机可查看）
 
 `summary.md` 修正完成后，复制一份到用户的 Obsidian iCloud 目录，文件名重命名为 `YYYY-MM-DD.md`，方便用户从手机 / iPad 上查看。
 
@@ -375,20 +409,24 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 
 - 一级目录 `Newsletter/` 是 Obsidian 总日报目录（其他 agent 也可能并列建子目录）。
 - 二级目录 `Daily Build/` 是本日报系列专属。
-- **只复制 `summary.md` 这一个文件**，重命名为 `YYYY-MM-DD.md`；分类文件 (`a-hn-and-others.md` 等) 不上传。
+- **只复制 `summary.md`**，重命名为 `YYYY-MM-DD.md`；分类文件 (`a-hn-and-others.md` 等) 不上传。
+- **step 10 台账本期有追加时**，另把 `assets/topics/agentic-engineering.md` 覆盖复制到
+  `Newsletter/Daily Build/Topics/agentic-engineering.md`，复制前同样跑 `#数字` 自检。
 - 若 `Newsletter/Daily Build/` 不存在则用 `mkdir -p` 创建（路径包含空格，**bash 中必须加引号**）。
 - 若同名文件已存在（同日重跑），直接覆盖。
 - **复制前必跑 `#数字` 自检**（参见 step 7 末尾的 "Obsidian tag 兼容" 规则）：`grep -nE '[A-Za-z一-龥][[:space:]]#[0-9]' summary.md` 必须 0 命中。命中则全部改成去掉 `#` 的写法（`Techmeme #25` → `Techmeme 25`），改完再复制到 Obsidian 目录。
 
 完成后在收尾报告中给出 Obsidian 路径，确认 iCloud 同步路径已更新。
 
-### 11) 收尾
+### 12) 收尾
 - 返回生成的文件路径清单（含 Obsidian 同步路径），并说明是否发生去重与被移除的标题。
 - 附上 fact-check 轮次结果摘要（`[FIX]`/`[DROP]`/`[DEDUP-ERROR]` 条数）。
+- 主题台账本期追加条数（0 条也写明）。
 
 ## Assets
 - 仓库根目录 `assets/` 用于保存每日输出文件夹（YYYY-MM-DD），已加入 `.gitignore`。
-- Obsidian iCloud 镜像路径：`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/jiachen yu/Newsletter/Daily Build/`（仅 `summary.md`，重命名为 `YYYY-MM-DD.md`）。
+- `assets/topics/`：跨期主题台账（step 10），同样不进 git；目录名不是日期，step 4 的 7 天去重不会扫到它。
+- Obsidian iCloud 镜像路径：`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/jiachen yu/Newsletter/Daily Build/`（`summary.md` 重命名为 `YYYY-MM-DD.md`；台账放 `Topics/` 子目录）。
 
 ## 注意事项：路径处理
 
