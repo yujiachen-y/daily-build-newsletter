@@ -91,7 +91,8 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **上游依赖跟踪（归入 Section B 的「上游动态」小节）**：`codex-releases` / `openclaw-releases` /
   `pi-releases` / `oh-my-pi-releases` / `openai-node-releases` / `anthropic-api-release-notes` /
   `deepseek-harness-releases` / `kimi-code-releases` / `hyperframes-releases` / `claude-code-releases`，
-  harness system prompt 变更源 `phistory-prompts`，以及维护者 RFC 源 `claude-code-rfcs` / `pi-rfcs`。
+  harness system prompt 变更源 `phistory-prompts`，agent skill 仓库的 commit 源 `pstack-commits` /
+  `mattpocock-skills-commits`，以及维护者 RFC 源 `claude-code-rfcs` / `pi-rfcs`。
   这些源的条目**不参与常规 Section B 排序**，也不进 Section A 或 Section C——即使
   `anthropic-api-release-notes` 的 URL 是 docs.claude.com、`phistory-prompts` 的正文很长。
 - **深度文章（Section C）**：具备长文/深度解析特征（标题、来源、摘要判断）。
@@ -323,6 +324,15 @@ EOF
   正文最长 30KB，超出会注明截断）。**不要整篇读**，只看 `+`/`-` 行，挑行为指令的变化写（新工具、新约束、
   删掉的规则）；纯措辞、tool schema 字段重排直接略过。它回答"提示词里实际改了什么"，与同版本的
   `*-releases` 互为补充，可以写进同一段，但要注明这是第三方抓包，不是官方 changelog。
+- **`pstack-commits` / `mattpocock-skills-commits` 跟的是 skill 本身怎么演进**（`backnotprop/pstack`、
+  `mattpocock/skills` 的 main 分支 commit，这两个仓库几乎不发 release）。commit message 很薄，标题常只有
+  `upstream: cursor/plugins/pstack @ <sha>`，**不看 diff 就写不出改了什么**；但整份 diff 能到 540KB，只取
+  skill 正文：
+  `curl -sL https://github.com/<repo>/commit/<sha>.diff | awk '/^diff --git/{p = ($0 ~ /\/SKILL\.md$|\/references\//)} p'`
+  （同一份实测降到 22KB）。只写行为变化（新 skill、新规则、删掉的约束、工作流改动）；README、赞助、
+  徽章类 commit 直接略过。pstack 是 Cursor 插件 `cursor/plugins/pstack` 的镜像，`upstream: … @ <sha>` 与紧随的
+  `Sync upstream … (0.15.x)` 是同一次变更，合并成一条写，版本号取 Sync 那条。写进 summary 的条目是 step 10
+  台账的候选。
 - **`hyperframes-releases` 是唯一的非 coding-agent 源**（HeyGen 的 HTML→视频渲染引擎），
   写作时不要硬套进"AI 编程工具"的叙事里凑合力段落。
 - **`openai-node-releases` 是 OpenAI 侧的替代信号**：官方 changelog 页面

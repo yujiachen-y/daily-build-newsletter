@@ -736,3 +736,21 @@ def test_phistory_prompts_diffs_against_previous_version():
 
     assert [i.title for i in items] == ["Claude Code 1.0.2 system prompt (+1/-1 vs 1.0.1)"]
     assert "-b" in items[0].content_markdown and "+c" in items[0].content_markdown
+
+
+def test_github_commits_drops_merges_and_old_entries():
+    from article_harvest.sources.blogs.github_commits import pstack_commits_source
+
+    feed = _atom(
+        [
+            ("fix(poteto-mode): support explicit orchestrate frontier base", _recent(1)),
+            ("Merge PR #15: support explicit orchestrate frontier base", _recent(1)),
+            ("Use ~/.claude/rules/pstack-models.md for settings", _recent(60)),
+        ]
+    )
+    session = _DummySession(default=_DummyResponse(content=feed))
+    items = pstack_commits_source().fetch(_ctx(session))
+
+    assert [item.title for item in items] == [
+        "fix(poteto-mode): support explicit orchestrate frontier base"
+    ]

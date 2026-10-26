@@ -30,6 +30,7 @@ from .blogs.eugene_yan import source as eugene_yan_source
 from .blogs.founders_fund_anatomy import source as founders_fund_source
 from .blogs.fs_blog import source as fs_blog_source
 from .blogs.ghuntley import source as ghuntley_source
+from .blogs.github_commits import mattpocock_skills_commits_source, pstack_commits_source
 from .blogs.github_releases import (
     claude_code_releases_source,
     codex_releases_source,
@@ -199,6 +200,9 @@ _SOURCES: list[Source] = [
     claude_code_releases_source(),
     # 各 harness system prompt 的版本间 diff（来自 WEIFENG2333/phistory）
     phistory_prompts_source(),
+    # agent skill 仓库的 commit 流（不发 release，变化只在 commit 里）
+    pstack_commits_source(),
+    mattpocock_skills_commits_source(),
     # 维护者 RFC：上游动态里"快要来什么"的一半，需要 GITHUB_TOKEN
     claude_code_rfcs_source(),
     pi_rfcs_source(),
