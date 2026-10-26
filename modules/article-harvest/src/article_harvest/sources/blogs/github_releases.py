@@ -99,6 +99,12 @@ def pi_releases_source() -> Source:
     return _releases_source("pi-releases", "pi-monorepo Releases", "earendil-works/pi")
 
 
+def oh_my_pi_releases_source() -> Source:
+    # pi 的社区 fork（can1357/Stencil Labs，npm @oh-my-pi/pi-coding-agent），独立演进很快。
+    # 全是正式版、changesets 生成的完整 changelog，约一天两个版本，atom 的 10 条窗口够用。
+    return _releases_source("oh-my-pi-releases", "oh-my-pi Releases", "can1357/oh-my-pi")
+
+
 def openai_node_releases_source() -> Source:
     return _releases_source(
         "openai-node-releases", "OpenAI Node SDK Releases", "openai/openai-node"

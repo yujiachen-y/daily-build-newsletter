@@ -89,10 +89,10 @@ description: Generate a daily article digest/newsletter by checking article-harv
   - 来自 HN / Lobsters 等源但 URL 指向上述论文平台的条目
 - **GitHub Repo（归入 Section B，写入 `b-github-repos.md`）**：URL 指向 github.com 的仓库页面（排除论文类 GitHub 页面如 awesome-xxx-papers）。
 - **上游依赖跟踪（归入 Section B 的「上游动态」小节）**：`codex-releases` / `openclaw-releases` /
-  `pi-releases` / `openai-node-releases` / `anthropic-api-release-notes` / `deepseek-harness-releases` /
-  `kimi-code-releases` / `hyperframes-releases` / `claude-code-releases`，以及维护者 RFC 源
-  `claude-code-rfcs` / `pi-rfcs`。这些源的条目**不参与常规 Section B 排序**，也不进 Section A——即使
-  `anthropic-api-release-notes` 的 URL 是 docs.claude.com。
+  `pi-releases` / `oh-my-pi-releases` / `openai-node-releases` / `anthropic-api-release-notes` /
+  `deepseek-harness-releases` / `kimi-code-releases` / `hyperframes-releases` / `claude-code-releases`，
+  以及维护者 RFC 源 `claude-code-rfcs` / `pi-rfcs`。这些源的条目**不参与常规 Section B 排序**，也不进
+  Section A——即使 `anthropic-api-release-notes` 的 URL 是 docs.claude.com。
 - **深度文章（Section C）**：具备长文/深度解析特征（标题、来源、摘要判断）。
 - **HN/其他网站（Section A）**：不属于以上三类的所有条目。包括投融资与股权交易新闻（来自 techcrunch-venture、techcrunch-fundings、sifted、crunchbase-news、sec-edgar-form-d、kr36-motif、techmeme 中的融资条目）。
 - 若条目匹配多个分类，选择最贴合的一类，保证分类互斥。
@@ -313,6 +313,10 @@ EOF
 - **`kimi-code-releases` 的 notes 同样很长**（单版实测 11KB，格式是 changesets 的
   `### Minor Changes` + PR 链接列表）。和 openclaw 一样只读小节标题下的条目，不要整篇读。
   注意仓库是 `MoonshotAI/kimi-code`，与 `MoonshotAI/kimi-cli` 是两个不同的项目，别写混。
+- **`oh-my-pi-releases` 的 notes 是 per-package 的 changesets**（`## @oh-my-pi/xxx` → `### Added` /
+  `### Fixed`，单版实测 2.4–42KB，约一天两个版本）。和 kimi-code 一样只读小节标题下的条目，不要整篇读；
+  连续小版本只挑能力变化写，重复靠 step 4 的 7 天去重挡。注意它是 `can1357/oh-my-pi`（pi 的社区 fork），
+  与 `pi-releases`（`earendil-works/pi`）是两条独立演进线，别写混。
 - **`hyperframes-releases` 是唯一的非 coding-agent 源**（HeyGen 的 HTML→视频渲染引擎），
   写作时不要硬套进"AI 编程工具"的叙事里凑合力段落。
 - **`openai-node-releases` 是 OpenAI 侧的替代信号**：官方 changelog 页面
