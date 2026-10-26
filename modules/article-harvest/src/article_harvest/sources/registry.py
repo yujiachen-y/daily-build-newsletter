@@ -71,6 +71,7 @@ from .blogs.onboard import source as onboard_source
 from .blogs.openai_dev_blog import source as openai_dev_blog_source
 from .blogs.openai_news import source as openai_news_source
 from .blogs.paul_graham import source as paul_graham_source
+from .blogs.phistory_prompts import source as phistory_prompts_source
 from .blogs.physical_intelligence import source as physical_intelligence_source
 from .blogs.pragmatic_engineer import source as pragmatic_engineer_source
 from .blogs.ramp_builders import source as ramp_builders_source
@@ -196,6 +197,8 @@ _SOURCES: list[Source] = [
     kimi_code_releases_source(),
     hyperframes_releases_source(),
     claude_code_releases_source(),
+    # 各 harness system prompt 的版本间 diff（来自 WEIFENG2333/phistory）
+    phistory_prompts_source(),
     # 维护者 RFC：上游动态里"快要来什么"的一半，需要 GITHUB_TOKEN
     claude_code_rfcs_source(),
     pi_rfcs_source(),

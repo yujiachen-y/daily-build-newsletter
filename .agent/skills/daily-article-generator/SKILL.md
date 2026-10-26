@@ -91,8 +91,9 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - **上游依赖跟踪（归入 Section B 的「上游动态」小节）**：`codex-releases` / `openclaw-releases` /
   `pi-releases` / `oh-my-pi-releases` / `openai-node-releases` / `anthropic-api-release-notes` /
   `deepseek-harness-releases` / `kimi-code-releases` / `hyperframes-releases` / `claude-code-releases`，
-  以及维护者 RFC 源 `claude-code-rfcs` / `pi-rfcs`。这些源的条目**不参与常规 Section B 排序**，也不进
-  Section A——即使 `anthropic-api-release-notes` 的 URL 是 docs.claude.com。
+  harness system prompt 变更源 `phistory-prompts`，以及维护者 RFC 源 `claude-code-rfcs` / `pi-rfcs`。
+  这些源的条目**不参与常规 Section B 排序**，也不进 Section A 或 Section C——即使
+  `anthropic-api-release-notes` 的 URL 是 docs.claude.com、`phistory-prompts` 的正文很长。
 - **深度文章（Section C）**：具备长文/深度解析特征（标题、来源、摘要判断）。
 - **HN/其他网站（Section A）**：不属于以上三类的所有条目。包括投融资与股权交易新闻（来自 techcrunch-venture、techcrunch-fundings、sifted、crunchbase-news、sec-edgar-form-d、kr36-motif、techmeme 中的融资条目）。
 - 若条目匹配多个分类，选择最贴合的一类，保证分类互斥。
@@ -317,6 +318,11 @@ EOF
   `### Fixed`，单版实测 2.4–42KB，约一天两个版本）。和 kimi-code 一样只读小节标题下的条目，不要整篇读；
   连续小版本只挑能力变化写，重复靠 step 4 的 7 天去重挡。注意它是 `can1357/oh-my-pi`（pi 的社区 fork），
   与 `pi-releases`（`earendil-works/pi`）是两条独立演进线，别写混。
+- **`phistory-prompts` 的每条 item 是一个 harness 版本的 system prompt 与上一版的 unified diff**
+  （数据来自第三方仓库 `WEIFENG2333/phistory` 的抓包，标题形如 `Claude Code 1.0.2 system prompt (+N/-M vs 1.0.1)`，
+  正文最长 30KB，超出会注明截断）。**不要整篇读**，只看 `+`/`-` 行，挑行为指令的变化写（新工具、新约束、
+  删掉的规则）；纯措辞、tool schema 字段重排直接略过。它回答"提示词里实际改了什么"，与同版本的
+  `*-releases` 互为补充，可以写进同一段，但要注明这是第三方抓包，不是官方 changelog。
 - **`hyperframes-releases` 是唯一的非 coding-agent 源**（HeyGen 的 HTML→视频渲染引擎），
   写作时不要硬套进"AI 编程工具"的叙事里凑合力段落。
 - **`openai-node-releases` 是 OpenAI 侧的替代信号**：官方 changelog 页面

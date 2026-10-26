@@ -699,3 +699,40 @@ def test_github_rfcs_raises_instead_of_truncating(monkeypatch):
     )
     with pytest.raises(FetchError):
         github_rfcs.claude_code_rfcs_source().fetch(_ctx(session))
+
+
+def test_phistory_prompts_diffs_against_previous_version():
+    from article_harvest.sources.blogs.phistory_prompts import _RAW, source
+
+    def cap(version, days_ago, agent_id="claude-code", variant="default"):
+        return {
+            "agent_id": agent_id,
+            "agent": "Claude Code",
+            "version": version,
+            "variant_id": variant,
+            "published_at": _recent(days_ago),
+            "prompt": f"captures/{agent_id}/{version}/variants/{variant}/prompt.md",
+        }
+
+    index = {
+        "captures": [
+            cap("1.0.2", 1),
+            cap("1.0.1", 2),
+            cap("1.0.0", 60),  # 旧于窗口，只作为 1.0.1 的 diff 基线
+            cap("1.0.2", 1, variant="sdk"),  # 非 default 变体不跟
+        ]
+    }
+    prompts = {
+        "1.0.0": "a\nb\n",
+        "1.0.1": "a\nb\n",  # 与上一版相同 → 不出 item
+        "1.0.2": "a\nc\n",
+    }
+    responses = {_RAW + "captures/index.json": _DummyResponse(json_data=index)}
+    for version, text in prompts.items():
+        path = f"captures/claude-code/{version}/variants/default/prompt.md"
+        responses[_RAW + path] = _DummyResponse(text=text)
+
+    items = source().fetch(_ctx(_DummySession(responses)))
+
+    assert [i.title for i in items] == ["Claude Code 1.0.2 system prompt (+1/-1 vs 1.0.1)"]
+    assert "-b" in items[0].content_markdown and "+c" in items[0].content_markdown
