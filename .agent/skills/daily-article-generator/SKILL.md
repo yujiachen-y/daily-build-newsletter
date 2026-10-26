@@ -421,6 +421,9 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - 一级目录 `Newsletter/` 是 Obsidian 总日报目录（其他 agent 也可能并列建子目录）。
 - 二级目录 `Daily Build/` 是本日报系列专属。
 - **只复制 `summary.md`**，重命名为 `YYYY-MM-DD.md`；分类文件 (`a-hn-and-others.md` 等) 不上传。
+- **同一份再覆盖复制到 `Daily Build/Today.md`**：用户的 iOS 快捷指令「早起」起床时用固定 URL
+  `obsidian://open?vault=jiachen%20yu&file=Newsletter%2FDaily%20Build%2FToday` 打开它，所以这个路径不能改；
+  只要 `Today.md` 每天被覆盖，打开的就始终是最新一期。
 - **step 10 台账本期有追加时**，另把 `assets/topics/agentic-engineering.md` 覆盖复制到
   `Newsletter/Daily Build/Topics/agentic-engineering.md`，复制前同样跑 `#数字` 自检。
 - 若 `Newsletter/Daily Build/` 不存在则用 `mkdir -p` 创建（路径包含空格，**bash 中必须加引号**）。
