@@ -1,11 +1,11 @@
 #!/bin/zsh -l
-# 定时出报入口：launchd 每天调它，也可手动执行（手动跑就是立即出今天的报）。
+# 定时出报入口：launchd 每天调它（scripts/install-launchd.sh 安装），也可手动执行（手动跑就是立即出今天的报）。
 # 做法与社区标准一致：OS 调度器 + agent 无头模式（omp -p），技能由仓库内
 # .agent/skills/daily-article-generator 提供。登录 shell（-l）拿 mise/uv 的 PATH。
 # 日志：~/Library/Logs/daily-build-newsletter/YYYY-MM-DD.log
 set -uo pipefail
 
-REPO="$HOME/Workspace/github.com/yujiachen-y/daily-build-newsletter"
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="$HOME/Library/Logs/daily-build-newsletter"
 mkdir -p "$LOG_DIR"
 exec >> "$LOG_DIR/$(date +%F).log" 2>&1
