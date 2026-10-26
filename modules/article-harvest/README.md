@@ -22,13 +22,13 @@ All data lives under `modules/article-harvest/data/` and is ignored by git.
 
 ## Quick Start
 
-Install dependencies (from this directory):
+Install the CLI as a uv tool (from this directory; safe to re-run):
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+uv tool install --force --managed-python --python 3.10 -c constraints.txt -e .
 ```
+
+Dependency versions are pinned in `constraints.txt`.
 
 Run an ingest:
 

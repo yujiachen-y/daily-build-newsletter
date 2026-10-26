@@ -1,0 +1,18 @@
+# Pinned runtime dependencies for the article-harvest CLI (Python 3.10).
+# Used as a constraints file by the install commands in README.md.
+# Regenerate from the installed tool environment with:
+#   uv pip freeze --exclude-editable --python "$(uv tool dir)/article-harvest"
+beautifulsoup4==4.13.3
+certifi==2024.7.4
+charset-normalizer==3.4.5
+feedparser==6.0.11
+idna==3.10
+lxml==6.0.2
+markdownify==1.2.2
+python-dateutil==2.9.0.post0
+requests==2.32.3
+sgmllib3k==1.0.0
+six==1.16.0
+soupsieve==2.6
+typing-extensions==4.15.0
+urllib3==2.2.3

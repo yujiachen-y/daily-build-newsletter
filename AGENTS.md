@@ -13,8 +13,9 @@
 
 Most development happens inside a module directory (example: `modules/article-harvest/`):
 
-- `python -m venv .venv && source .venv/bin/activate`: create/activate a local virtualenv.
-- `pip install -e ".[dev]"`: install the module in editable mode plus dev tooling.
+- `uv tool install --force --managed-python --python 3.10 -c constraints.txt -e .`: install (or reinstall) the `article-harvest` CLI as a uv tool on Python 3.10, with dependency versions pinned by `constraints.txt`.
+- `uv venv --managed-python --python 3.10 --clear && source .venv/bin/activate`: create/activate a local virtualenv for dev tooling.
+- `uv pip install -c constraints.txt -e ".[dev]"`: install the module in editable mode plus dev tooling into that virtualenv.
 - `article-harvest ingest`: fetch sources and persist snapshots/items under `data/`.
 - `pytest`: run unit tests.
 - `ruff check .`: run lint + import sorting checks.

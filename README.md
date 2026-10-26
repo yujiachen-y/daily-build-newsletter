@@ -19,10 +19,8 @@ Data is stored as flat files (JSON + Markdown) under a local `data/` directory (
 git clone https://github.com/yujiachen-y/daily-build-newsletter.git
 cd daily-build-newsletter/modules/article-harvest
 
-# Create virtualenv and install
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+# Install the CLI as a uv tool (Python 3.10, versions pinned in constraints.txt; safe to re-run)
+uv tool install --force --managed-python --python 3.10 -c constraints.txt -e .
 
 # Fetch articles from all sources
 article-harvest ingest
@@ -58,8 +56,10 @@ daily-build-newsletter/
 ```bash
 cd modules/article-harvest
 
-# Install with dev dependencies
-pip install -e ".[dev]"
+# Create a local virtualenv and install with dev dependencies
+uv venv --managed-python --python 3.10 --clear
+uv pip install -c constraints.txt -e ".[dev]"
+source .venv/bin/activate
 
 # Run tests
 pytest
@@ -71,7 +71,7 @@ ruff check .
 ruff format .
 ```
 
-Requires Python 3.10+.
+Requires [uv](https://docs.astral.sh/uv/), which provides the Python 3.10 used above.
 
 ## CLI Reference
 
