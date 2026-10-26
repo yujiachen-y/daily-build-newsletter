@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <!-- 安装：cp 本文件到 ~/Library/LaunchAgents/ && mkdir -p ~/Library/Logs/daily-build-newsletter
+         （launchd 在 spawn 前打开日志路径，不会自建目录，漏了这步 job 直接 exit 78）
+         && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.yujiachen.daily-build-newsletter.plist -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.yujiachen.daily-build-newsletter</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>-l</string>
+        <string>~/Workspace/github.com/yujiachen-y/daily-build-newsletter/scripts/generate-daily-build.sh</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>~/Workspace/github.com/yujiachen-y/daily-build-newsletter</string>
+    <!-- 历史 out 报时间 ~04:2x；04:00 起跑留足余量。睡眠错过时 launchd 唤醒后补跑一次 -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>4</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>~/Library/Logs/daily-build-newsletter/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>~/Library/Logs/daily-build-newsletter/launchd.err.log</string>
+</dict>
+</plist>
