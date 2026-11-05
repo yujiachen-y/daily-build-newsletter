@@ -427,6 +427,16 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
   - `[DROP]` — harvest 无证据且 WebFetch 失败/404，建议删除
   - `[VERIFY-FAIL]` — 原文存在但内容无法判断，建议收紧到标题级
   - `[DEDUP-ERROR]` — 去重日期/归属错误，给出正确日期
+  - `[UNCHECKED]` — 预算用完时还没核的断言
+- **预算（必须原样写进给 subagent 的任务里）**：只审 summary.md 里的断言；分类文件只用来核对 summary
+  引用到的去重标注，不另审分类文件自身的分数、计数和链接。每条断言核一次就记结论，不回头复核已判
+  `[OK]` 的条目，不在思考里重新罗列已核过的清单。工具调用约 60 次或 20 分钟封顶，到了就停，剩下的标
+  `[UNCHECKED]`。
+- **边核边落盘**：每核完一个 Section，就把该段结论追加到 `assets/YYYY-MM-DD/fact-check.md`，最终报告也
+  写在那里。subagent 中途被打断时，主 agent 仍能拿到已核的部分。
+- 为什么要设预算：2026-10-23 默认模型换成 MiniMax-M3.1-Flash 后，fact-checker 从 3–7 分钟涨到 32–48 分钟
+  （单轮思考 6.7 万字，累计 250 万字，大多花在复述已核清单和扩审分类文件上）。10-27、10-28 两期因此撞上
+  定时脚本的 `--max-time`，台账和 Obsidian 同步都没跑。
 
 **重点审查清单**
 - 所有数字：HN 分数、GitHub stars、SWE-Bench 跑分、估值、融资金额
@@ -440,6 +450,9 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - **合力（synthesis）密度审查**：每个 Section 是否至少有 1 个 thesis 段落（把 3+ 条相关条目熔成一个论点的合力判断），还是仅由独立条目段落 / bullet 列表组成？若一个 Section 全部为独立条目而无 thesis，标记为**结构性问题**（非事实错误，但写作质量回退到"流水账"），在收尾报告中提示，下期写作前重读本规则。
 
 **处理 subagent 报告**
+- **主 agent 最多等 25 分钟**（从启动 subagent 算起）。超时就停止等待，能取消就取消 subagent，然后读
+  `fact-check.md` 里已落盘的部分，按下面几条处理。收尾报告写明「fact-check 未完成，已核 N 条」，再继续
+  step 10–12。不能为了等 fact-check 让整轮超过定时脚本的总时限。
 - `[FIX]` / `[DEDUP-ERROR]` / `[VERIFY-FAIL]` 逐条按建议修改。
 - `[DROP]` **必须交叉校验**：subagent 没有主 agent 的 WebFetch cache，它的 [DROP] 可能是 false positive（主 agent 已成功 WebFetch 过）。仅当主 agent 这侧也无证据时才删除。
 - 修正后重跑 step 8 的三条长度自检（行数 ≤60、字数 ≤10,000、无 >300 字单段）。**修正常常会加长正文**（补 hedge、补出处、补口径说明），因此这一步比初稿时更容易超限；超了就按 step 8 的删除顺序压缩，不得为保留细节而突破上限。
@@ -486,6 +499,10 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - **复制前必跑 `#数字` 自检**（参见 step 7 末尾的 "Obsidian tag 兼容" 规则）：`grep -nE '[A-Za-z一-龥][[:space:]]#[0-9]' summary.md` 必须 0 命中。命中则全部改成去掉 `#` 的写法（`Techmeme #25` → `Techmeme 25`），改完再复制到 Obsidian 目录。
 
 完成后在收尾报告中给出 Obsidian 路径，确认 iCloud 同步路径已更新。
+
+定时脚本 `scripts/generate-daily-build.sh` 在 omp 退出后会检查当天的 `YYYY-MM-DD.md`。如果它不存在而
+`summary.md` 已经写好，脚本会在开头加一行「未经事实审查」，然后把 summary.md 复制到这两个位置。这只是兜底，
+不能代替本步骤。
 
 ### 12) 收尾
 - 返回生成的文件路径清单（含 Obsidian 同步路径），并说明是否发生去重与被移除的标题。
