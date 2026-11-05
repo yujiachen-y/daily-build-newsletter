@@ -4,6 +4,7 @@
 .ruff_cache/
 
 modules/article-harvest/data/
+modules/app-radar/data/
 modules/article-harvest/.coverage
 assets/
 

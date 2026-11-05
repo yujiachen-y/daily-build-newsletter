@@ -1,0 +1,436 @@
+{
+  "_comment": "Waves and controls for `app-radar backtest`. Controls were picked before their App Store data was looked at; do not tune them to the result. Patterns match app names (case-insensitive regex).",
+  "_baseline_comment": "Baseline terms are evergreen niche utilities whose result sets are about as small as the topic terms'. Crowded terms (calculator, weather) were tried first and understated the 2025-26 App Store-wide growth (2026 vs 2025: 1.2x against 2.7x here), because relevance ranking fills their 200 results with old apps.",
+  "start_month": "2015-07",
+  "end_month": "2026-10",
+  "github_start_month": "2019-01",
+  "baseline": [
+    {
+      "term": "metronome",
+      "pattern": "metronom"
+    },
+    {
+      "term": "tip calculator",
+      "pattern": "tip"
+    },
+    {
+      "term": "bubble level",
+      "pattern": "level"
+    },
+    {
+      "term": "morse code",
+      "pattern": "morse"
+    },
+    {
+      "term": "unit converter",
+      "pattern": "convert"
+    },
+    {
+      "term": "white noise",
+      "pattern": "noise"
+    },
+    {
+      "term": "compass",
+      "pattern": "compass"
+    },
+    {
+      "term": "tuner",
+      "pattern": "tuner"
+    },
+    {
+      "term": "barcode scanner",
+      "pattern": "barcode|scan"
+    },
+    {
+      "term": "magnifier",
+      "pattern": "magnif"
+    }
+  ],
+  "waves": [
+    {
+      "id": "glp1",
+      "label": "GLP-1 记录",
+      "kind": "health",
+      "wiki": [
+        "en.wikipedia:Semaglutide",
+        "en.wikipedia:Tirzepatide",
+        "de.wikipedia:Semaglutid",
+        "fr.wikipedia:Sémaglutide",
+        "ja.wikipedia:セマグルチド"
+      ],
+      "hn": [
+        "ozempic",
+        "semaglutide"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "glp-1",
+            "ozempic",
+            "semaglutide"
+          ],
+          "pattern": "glp|ozempic|semaglut|wegovy|mounjaro|zepbound|tirzepat",
+          "min_ratings": 5000
+        },
+        {
+          "country": "de",
+          "terms": [
+            "abnehmspritze"
+          ],
+          "pattern": "abnehm|spritze|glp|ozempic|semaglut|wegovy|mounjaro|tirzepat",
+          "min_ratings": 300
+        }
+      ]
+    },
+    {
+      "id": "quit_porn",
+      "label": "戒色",
+      "kind": "health",
+      "note": "App Store 搜索屏蔽 porn 一词（美区返回 0 条），供给用 nofap、quittr、quit lust 三个词。",
+      "wiki": [
+        "en.wikipedia:NoFap"
+      ],
+      "hn": [
+        "nofap"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "nofap",
+            "quittr",
+            "quit lust"
+          ],
+          "pattern": "nofap|porn|\\bpmo\\b|lust|quittr|unchaind|fortify|brainbuddy|reboot|relapse|celiba|semen",
+          "min_ratings": 5000
+        }
+      ]
+    },
+    {
+      "id": "fasting",
+      "label": "间歇性断食",
+      "kind": "health",
+      "wiki": [
+        "en.wikipedia:Intermittent_fasting",
+        "de.wikipedia:Intervallfasten"
+      ],
+      "hn": [
+        "intermittent fasting"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "intermittent fasting",
+            "fasting tracker"
+          ],
+          "pattern": "fasting|\\bfast\\b",
+          "min_ratings": 5000
+        },
+        {
+          "country": "de",
+          "terms": [
+            "intervallfasten"
+          ],
+          "pattern": "intervall|fasten|fasting",
+          "min_ratings": 300
+        }
+      ]
+    },
+    {
+      "id": "ai_photo",
+      "label": "AI 头像与证件照",
+      "kind": "ai",
+      "wiki": [
+        "en.wikipedia:Stable_Diffusion",
+        "en.wikipedia:DreamBooth"
+      ],
+      "hn": [
+        "stable diffusion",
+        "dreambooth"
+      ],
+      "github": [
+        "stable diffusion"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "ai headshot",
+            "ai avatar",
+            "ai photo"
+          ],
+          "pattern": "headshot|\\bai\\b.*(avatar|photo|portrait|selfie|yearbook)|(avatar|photo|portrait|selfie|yearbook).*\\bai\\b",
+          "min_ratings": 5000
+        }
+      ]
+    },
+    {
+      "id": "ai_chat",
+      "label": "AI 聊天助手",
+      "kind": "ai",
+      "wiki": [
+        "en.wikipedia:GPT-3",
+        "en.wikipedia:ChatGPT"
+      ],
+      "hn": [
+        "GPT-3",
+        "ChatGPT"
+      ],
+      "github": [
+        "chatgpt"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "ai chat",
+            "chatbot",
+            "ai assistant"
+          ],
+          "pattern": "chatbot|chatgpt|\\bgpt|\\bai\\b.*\\bchat|\\bchat\\b.*\\bai\\b",
+          "min_ratings": 50000
+        }
+      ]
+    },
+    {
+      "id": "ai_companion",
+      "label": "AI 陪伴",
+      "kind": "ai",
+      "wiki": [
+        "en.wikipedia:Replika",
+        "en.wikipedia:Character.ai"
+      ],
+      "hn": [
+        "replika",
+        "character.ai"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "ai companion",
+            "ai girlfriend",
+            "ai friend"
+          ],
+          "pattern": "companion|girlfriend|boyfriend|ai friend|waifu|replika",
+          "min_ratings": 5000
+        }
+      ]
+    },
+    {
+      "id": "short_drama",
+      "label": "短剧",
+      "kind": "content",
+      "wiki": [
+        "en.wikipedia:ReelShort"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "short drama",
+            "drama shorts"
+          ],
+          "pattern": "drama|reelshort",
+          "min_ratings": 5000
+        },
+        {
+          "country": "cn",
+          "terms": [
+            "短剧"
+          ],
+          "pattern": "短剧|微剧|剧场",
+          "min_ratings": 300
+        },
+        {
+          "country": "jp",
+          "terms": [
+            "ショートドラマ"
+          ],
+          "pattern": "ドラマ|drama",
+          "min_ratings": 300
+        }
+      ]
+    },
+    {
+      "id": "ai_manju",
+      "label": "AI 漫剧（中国区）",
+      "kind": "content",
+      "note": "免费的注意力源（Wikipedia、HN）都覆盖不到，只看供给；国内注意力要靠微信指数、抖音指数。",
+      "apps": [
+        {
+          "country": "cn",
+          "terms": [
+            "漫剧",
+            "ai漫剧"
+          ],
+          "pattern": "漫剧",
+          "min_ratings": 300,
+          "clone_min": 5
+        }
+      ]
+    },
+    {
+      "id": "vibe_coding",
+      "label": "vibe coding 工具",
+      "kind": "ai",
+      "wiki": [
+        "en.wikipedia:Vibe_coding",
+        "en.wikipedia:Cursor_(code_editor)"
+      ],
+      "hn": [
+        "vibe coding"
+      ],
+      "github": [
+        "vibe coding"
+      ],
+      "apps": [
+        {
+          "country": "us",
+          "terms": [
+            "vibe coding",
+            "ai app builder"
+          ],
+          "pattern": "vibe|app builder|build (an |your )?apps?|no.?code",
+          "min_ratings": 1000
+        }
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "id": "keto",
+      "wiki": "en.wikipedia:Ketogenic_diet",
+      "term": "keto",
+      "pattern": "keto"
+    },
+    {
+      "id": "carnivore",
+      "wiki": "en.wikipedia:Carnivore_diet",
+      "term": "carnivore diet",
+      "pattern": "carnivore"
+    },
+    {
+      "id": "sauna",
+      "wiki": "en.wikipedia:Sauna",
+      "term": "sauna",
+      "pattern": "sauna"
+    },
+    {
+      "id": "creatine",
+      "wiki": "en.wikipedia:Creatine",
+      "term": "creatine",
+      "pattern": "creatine"
+    },
+    {
+      "id": "berberine",
+      "wiki": "en.wikipedia:Berberine",
+      "term": "berberine",
+      "pattern": "berberine"
+    },
+    {
+      "id": "ashwagandha",
+      "wiki": "en.wikipedia:Withania_somnifera",
+      "term": "ashwagandha",
+      "pattern": "ashwagandha"
+    },
+    {
+      "id": "mouth_taping",
+      "wiki": "en.wikipedia:Mouth_taping",
+      "term": "mouth tape",
+      "pattern": "mouth.?tap"
+    },
+    {
+      "id": "pickleball",
+      "wiki": "en.wikipedia:Pickleball",
+      "term": "pickleball",
+      "pattern": "pickleball"
+    },
+    {
+      "id": "padel",
+      "wiki": "en.wikipedia:Padel",
+      "term": "padel",
+      "pattern": "padel"
+    },
+    {
+      "id": "rucking",
+      "wiki": "en.wikipedia:Rucking",
+      "term": "rucking",
+      "pattern": "ruck"
+    },
+    {
+      "id": "breathwork",
+      "wiki": "en.wikipedia:Breathwork",
+      "term": "breathwork",
+      "pattern": "breath"
+    },
+    {
+      "id": "cgm",
+      "wiki": "en.wikipedia:Continuous_glucose_monitor",
+      "term": "glucose monitor",
+      "pattern": "glucose|\\bcgm\\b"
+    },
+    {
+      "id": "dopamine_detox",
+      "wiki": "en.wikipedia:Dopamine_fasting",
+      "term": "dopamine detox",
+      "pattern": "dopamine"
+    },
+    {
+      "id": "sober_curious",
+      "wiki": "en.wikipedia:Sober_curious",
+      "term": "sober",
+      "pattern": "sober"
+    },
+    {
+      "id": "adhd",
+      "wiki": "en.wikipedia:Attention_deficit_hyperactivity_disorder",
+      "term": "adhd",
+      "pattern": "adhd"
+    },
+    {
+      "id": "menopause",
+      "wiki": "en.wikipedia:Menopause",
+      "term": "menopause",
+      "pattern": "menopaus"
+    },
+    {
+      "id": "wordle",
+      "wiki": "en.wikipedia:Wordle",
+      "term": "wordle",
+      "pattern": "wordle"
+    },
+    {
+      "id": "stoicism",
+      "wiki": "en.wikipedia:Stoicism",
+      "term": "stoic",
+      "pattern": "stoic"
+    },
+    {
+      "id": "journaling",
+      "wiki": "en.wikipedia:Journaling",
+      "term": "journal",
+      "pattern": "journal"
+    },
+    {
+      "id": "retatrutide",
+      "wiki": "en.wikipedia:Retatrutide",
+      "term": "retatrutide",
+      "pattern": "retatrutide"
+    },
+    {
+      "id": "peptide",
+      "wiki": "en.wikipedia:Peptide",
+      "term": "peptide",
+      "pattern": "peptide"
+    },
+    {
+      "id": "labubu",
+      "wiki": "en.wikipedia:Labubu",
+      "term": "labubu",
+      "pattern": "labubu"
+    }
+  ]
+}

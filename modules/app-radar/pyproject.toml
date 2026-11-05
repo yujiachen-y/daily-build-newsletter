@@ -1,0 +1,31 @@
+[project]
+name = "app-radar"
+version = "0.1.0"
+description = "Daily App Store chart snapshots and trend signals for the newsletter"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "requests>=2.32",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+app-radar = "app_radar.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "C90"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20

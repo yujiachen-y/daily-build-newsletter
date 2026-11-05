@@ -1,0 +1,6 @@
+{
+  "_comment": "Keywords for `app-radar indices` (DataXAPI, paid per call). Each keyword costs about $0.1 (WeChat) + $0.04 (Xiaohongshu) + $0.006/5 (Douyin) per fetch; with min_interval_days 7 that is roughly $0.6 per keyword per month. Edit freely.",
+  "keywords": ["戒糖", "控糖", "戒色", "HRV", "压力管理", "情绪记录", "热量计算", "AI记账"],
+  "platforms": ["wechat", "douyin", "xiaohongshu"],
+  "min_interval_days": 7
+}

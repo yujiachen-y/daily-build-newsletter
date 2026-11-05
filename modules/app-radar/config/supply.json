@@ -1,0 +1,450 @@
+{
+  "_comment": "Supply stage for `app-radar supply`. Baseline terms are evergreen niche utilities searched in each storefront's language; their launches per half year are the yardstick for App Store-wide growth (2026 ran about 2.7x 2025 in the US). Watch items use local-language terms per country; add a niche here when the auto theme tokens are too vague.",
+  "baseline": {
+    "us": [
+      {
+        "term": "metronome",
+        "pattern": "metronom"
+      },
+      {
+        "term": "tip calculator",
+        "pattern": "tip"
+      },
+      {
+        "term": "bubble level",
+        "pattern": "level"
+      },
+      {
+        "term": "morse code",
+        "pattern": "morse"
+      },
+      {
+        "term": "unit converter",
+        "pattern": "convert"
+      },
+      {
+        "term": "white noise",
+        "pattern": "noise"
+      },
+      {
+        "term": "compass",
+        "pattern": "compass"
+      },
+      {
+        "term": "tuner",
+        "pattern": "tuner"
+      },
+      {
+        "term": "barcode scanner",
+        "pattern": "barcode|scan"
+      },
+      {
+        "term": "magnifier",
+        "pattern": "magnif"
+      }
+    ],
+    "gb": [
+      {
+        "term": "metronome",
+        "pattern": "metronom"
+      },
+      {
+        "term": "tip calculator",
+        "pattern": "tip"
+      },
+      {
+        "term": "bubble level",
+        "pattern": "level"
+      },
+      {
+        "term": "morse code",
+        "pattern": "morse"
+      },
+      {
+        "term": "unit converter",
+        "pattern": "convert"
+      },
+      {
+        "term": "white noise",
+        "pattern": "noise"
+      },
+      {
+        "term": "compass",
+        "pattern": "compass"
+      },
+      {
+        "term": "tuner",
+        "pattern": "tuner"
+      },
+      {
+        "term": "barcode scanner",
+        "pattern": "barcode|scan"
+      },
+      {
+        "term": "magnifier",
+        "pattern": "magnif"
+      }
+    ],
+    "de": [
+      {
+        "term": "metronom",
+        "pattern": "metronom"
+      },
+      {
+        "term": "trinkgeld rechner",
+        "pattern": "trinkgeld|tip"
+      },
+      {
+        "term": "wasserwaage",
+        "pattern": "wasserwaage|level"
+      },
+      {
+        "term": "morsecode",
+        "pattern": "morse"
+      },
+      {
+        "term": "einheitenumrechner",
+        "pattern": "umrechn|convert"
+      },
+      {
+        "term": "weißes rauschen",
+        "pattern": "rauschen|noise"
+      },
+      {
+        "term": "kompass",
+        "pattern": "kompass|compass"
+      },
+      {
+        "term": "stimmgerät",
+        "pattern": "stimmger|tuner"
+      },
+      {
+        "term": "barcode scanner",
+        "pattern": "barcode|scan"
+      },
+      {
+        "term": "lupe",
+        "pattern": "lupe|magnif"
+      }
+    ],
+    "fr": [
+      {
+        "term": "métronome",
+        "pattern": "m[ée]tronome|metronom"
+      },
+      {
+        "term": "calcul pourboire",
+        "pattern": "pourboire|tip"
+      },
+      {
+        "term": "niveau à bulle",
+        "pattern": "niveau|level"
+      },
+      {
+        "term": "code morse",
+        "pattern": "morse"
+      },
+      {
+        "term": "convertisseur unités",
+        "pattern": "convert"
+      },
+      {
+        "term": "bruit blanc",
+        "pattern": "bruit|noise"
+      },
+      {
+        "term": "boussole",
+        "pattern": "boussole|compass"
+      },
+      {
+        "term": "accordeur",
+        "pattern": "accordeur|tuner"
+      },
+      {
+        "term": "scanner code barre",
+        "pattern": "code.?barre|barcode|scan"
+      },
+      {
+        "term": "loupe",
+        "pattern": "loupe|magnif"
+      }
+    ],
+    "jp": [
+      {
+        "term": "メトロノーム",
+        "pattern": "メトロノーム|metronom"
+      },
+      {
+        "term": "割り勘",
+        "pattern": "割り勘|tip"
+      },
+      {
+        "term": "水平器",
+        "pattern": "水平|level"
+      },
+      {
+        "term": "モールス信号",
+        "pattern": "モールス|morse"
+      },
+      {
+        "term": "単位変換",
+        "pattern": "単位|変換|convert"
+      },
+      {
+        "term": "ホワイトノイズ",
+        "pattern": "ノイズ|noise"
+      },
+      {
+        "term": "コンパス",
+        "pattern": "コンパス|compass"
+      },
+      {
+        "term": "チューナー",
+        "pattern": "チューナー|tuner"
+      },
+      {
+        "term": "バーコード",
+        "pattern": "バーコード|barcode|scan"
+      },
+      {
+        "term": "拡大鏡",
+        "pattern": "拡大|ルーペ|magnif"
+      }
+    ],
+    "kr": [
+      {
+        "term": "메트로놈",
+        "pattern": "메트로놈|metronom"
+      },
+      {
+        "term": "더치페이",
+        "pattern": "더치페이|tip"
+      },
+      {
+        "term": "수평계",
+        "pattern": "수평|level"
+      },
+      {
+        "term": "모스부호",
+        "pattern": "모스|morse"
+      },
+      {
+        "term": "단위 변환",
+        "pattern": "단위|변환|convert"
+      },
+      {
+        "term": "백색소음",
+        "pattern": "소음|noise"
+      },
+      {
+        "term": "나침반",
+        "pattern": "나침반|compass"
+      },
+      {
+        "term": "튜너",
+        "pattern": "튜너|tuner"
+      },
+      {
+        "term": "바코드",
+        "pattern": "바코드|barcode|scan"
+      },
+      {
+        "term": "돋보기",
+        "pattern": "돋보기|확대|magnif"
+      }
+    ],
+    "cn": [
+      {
+        "term": "节拍器",
+        "pattern": "节拍器|metronom"
+      },
+      {
+        "term": "AA 计算",
+        "pattern": "aa|分账|tip"
+      },
+      {
+        "term": "水平仪",
+        "pattern": "水平|level"
+      },
+      {
+        "term": "摩斯密码",
+        "pattern": "摩斯|morse"
+      },
+      {
+        "term": "单位换算",
+        "pattern": "换算|转换|convert"
+      },
+      {
+        "term": "白噪音",
+        "pattern": "白噪音|噪音|noise"
+      },
+      {
+        "term": "指南针",
+        "pattern": "指南针|compass"
+      },
+      {
+        "term": "调音器",
+        "pattern": "调音|tuner"
+      },
+      {
+        "term": "条形码",
+        "pattern": "条形码|条码|扫码|scan"
+      },
+      {
+        "term": "放大镜",
+        "pattern": "放大镜|magnif"
+      }
+    ]
+  },
+  "watch": [
+    {
+      "id": "glp1",
+      "label": "GLP-1 记录",
+      "countries": {
+        "us": {
+          "terms": [
+            "glp-1",
+            "ozempic"
+          ],
+          "pattern": "glp|ozempic|semaglut|wegovy|mounjaro|zepbound|tirzepat"
+        },
+        "de": {
+          "terms": [
+            "abnehmspritze"
+          ],
+          "pattern": "abnehm|spritze|glp|ozempic|semaglut|wegovy|mounjaro|tirzepat"
+        },
+        "fr": {
+          "terms": [
+            "glp-1"
+          ],
+          "pattern": "glp|ozempic|semaglut|wegovy|mounjaro|tirzepat"
+        },
+        "jp": {
+          "terms": [
+            "glp-1",
+            "マンジャロ"
+          ],
+          "pattern": "glp|マンジャロ|ウゴービ|オゼンピック|mounjaro|wegovy|ozempic"
+        }
+      }
+    },
+    {
+      "id": "peptide",
+      "label": "多肽记录",
+      "countries": {
+        "us": {
+          "terms": [
+            "peptide"
+          ],
+          "pattern": "peptide"
+        },
+        "gb": {
+          "terms": [
+            "peptide"
+          ],
+          "pattern": "peptide"
+        }
+      }
+    },
+    {
+      "id": "quit_sugar",
+      "label": "戒糖",
+      "countries": {
+        "us": {
+          "terms": [
+            "quit sugar"
+          ],
+          "pattern": "(quit|stop|cut|no|less|detox|free|addict|crav)\\w*\\W{0,3}sugar|sugar\\W{0,3}(free|detox|addict|crav|quit)|stoppr"
+        },
+        "fr": {
+          "terms": [
+            "arrêter le sucre"
+          ],
+          "pattern": "sucre|sugar\\W{0,3}(free|detox|quit)|stoppr"
+        },
+        "cn": {
+          "terms": [
+            "戒糖",
+            "控糖"
+          ],
+          "pattern": "戒糖|控糖|减糖"
+        }
+      }
+    },
+    {
+      "id": "quit_porn",
+      "label": "戒色",
+      "countries": {
+        "us": {
+          "terms": [
+            "nofap",
+            "quit lust"
+          ],
+          "pattern": "nofap|porn|\\bpmo\\b|lust|quittr|unchaind|fortify|brainbuddy|reboot|relapse"
+        },
+        "cn": {
+          "terms": [
+            "戒色"
+          ],
+          "pattern": "戒色|戒撸"
+        }
+      }
+    },
+    {
+      "id": "ai_manju",
+      "label": "AI 漫剧",
+      "countries": {
+        "cn": {
+          "terms": [
+            "漫剧",
+            "ai漫剧"
+          ],
+          "pattern": "漫剧"
+        }
+      }
+    },
+    {
+      "id": "short_drama",
+      "label": "短剧",
+      "countries": {
+        "us": {
+          "terms": [
+            "short drama"
+          ],
+          "pattern": "drama|reelshort"
+        },
+        "jp": {
+          "terms": [
+            "ショートドラマ"
+          ],
+          "pattern": "ドラマ|drama"
+        },
+        "kr": {
+          "terms": [
+            "숏드라마"
+          ],
+          "pattern": "드라마|drama"
+        }
+      }
+    },
+    {
+      "id": "heart_rate",
+      "label": "心率测量",
+      "countries": {
+        "jp": {
+          "terms": [
+            "心拍数"
+          ],
+          "pattern": "心拍"
+        },
+        "us": {
+          "terms": [
+            "heart rate monitor"
+          ],
+          "pattern": "heart rate|pulse|\\bhrv\\b"
+        }
+      }
+    }
+  ]
+}

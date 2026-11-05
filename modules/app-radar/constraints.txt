@@ -1,0 +1,7 @@
+# Pinned runtime dependencies for the app-radar CLI (Python 3.10).
+# Same versions as modules/article-harvest/constraints.txt.
+certifi==2024.7.4
+charset-normalizer==3.4.5
+idna==3.10
+requests==2.32.3
+urllib3==2.2.3
