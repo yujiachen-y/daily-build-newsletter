@@ -14,6 +14,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - 确认当前工作目录是仓库根目录。
 - 识别“今天”的日期（YYYY-MM-DD，本地时区），后续所有路径使用该日期。
 - 若 `article-harvest` CLI 不可用，先按 `modules/article-harvest/README.md` 的 Quick Start 安装依赖。
+  `app-radar` CLI 同理，见 `modules/app-radar/README.md`。
 
 ### 2) 检查今日文章与爬取
 - 进入 `modules/article-harvest/` 目录。
@@ -26,6 +27,11 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - 若重试后依然失败，停止生成日报：
   - 查看 `modules/article-harvest/data/runs/` 的最新 run 记录或 CLI 报错信息，定位问题。
   - 向用户说明问题原因与可能修复方向，并询问是否需要修复。
+- **App 榜单报告**：检查 `modules/app-radar/data/reports/YYYY-MM-DD.md` 是否存在（定时脚本在 omp 之前
+  已跑过 `app-radar run`）。不存在就执行
+  `DATAXAPI_API_KEY="${DATAXAPI_API_KEY:-$(security find-generic-password -s dataxapi-api-key -w 2>/dev/null)}" app-radar run --date YYYY-MM-DD`
+  （通常 3–5 分钟；供给搜索的缓存过期那天约 15 分钟）。它失败不阻断日报：step 8 的「App 榜单信号」整块省略，
+  收尾报告提一句。
 
 ### 3) 收集标题与元信息
 - 从 `article-harvest query archive --on YYYY-MM-DD --json` 输出中提取：标题、来源（source id）、URL、可用的权重指标（HN 分数、GitHub stars、HF 引用等）。
@@ -243,6 +249,41 @@ EOF
 - **不写具体联系方式与报价细节**：留言板含交易撮合信息，日报只做趋势观察，不转载对接方式。
 - **归入 Section A 的「资本与交易」小标题下。**
 
+#### App 榜单信号（Section A 末尾的固定小节）
+
+数据不来自 article-harvest，来自 `modules/app-radar`：每天抓 7 国 × 7 类非游戏 App 的 Apple 畅销榜和免费榜
+前 100，对一年内上架的「新秀」记录评分数。报告在 `modules/app-radar/data/reports/YYYY-MM-DD.md`，同名 `.json`
+是机器可读版。这块盯的是"一个已经跑通的 App 模板正在被换赛道、换市场复制"（例：戒色 App 的界面和付费结构
+被搬去做戒糖），HN 和 Techmeme 很少报这类事，通常等它成了案例文章，窗口已经关了。
+
+- **位置与篇幅**：在 Section A 末尾、「资本与交易」之后起加粗行 `**App 榜单信号**`（加粗而非 heading），
+  下面写 1 段，最多再跟 2 条 bullet，计入 step 8 的行数和字数上限。单点写成 bullet，不要另起第 2、3 段。
+  报告缺失，或报告里没有够格的信号时，整块省略，不写占位句。
+- **先写合力**：报告第 1 节的「名称主题」（至少 3 家开发商的新秀共用一个词）是这块 thesis 的来源。挑 1 个
+  主题，写清它是什么品类、几款新秀、几家开发商、在哪些国家、最好排第几，再点 1–2 款代表 App 具体做什么。
+  做什么取报告里的「描述开头」，不够就 WebFetch 报告给的 App Store 链接。
+- **再写单点**：从第 2 节挑 1–2 款同时满足两条的新秀：没有「该开发商另有上架超一年的在榜 App」标注；在某
+  个畅销榜前 20，或进了 3 个以上国家的畅销榜。带这个标注的是腾讯、TikTok、X 这类老玩家的新品，只在它本身
+  是大新闻时写，不能当作"新玩家在复制模板"的证据。
+- **供给阶段**：报告第 6 节按国家给每个主题和关注项标了阶段（已扎堆 / 有赢家、未扎堆 / 零星 / 几乎没人做）。
+  写到的主题或单点在第 6 节有对应行时，用半句话带上阶段和数字，例如「美区近 91 天新上架 25 款，已扎堆」。
+  「有赢家、未扎堆」，以及「一国已扎堆、另一国还零星」最值得写。阶段是「搜索结果触顶，数不准」的行，
+  不要写阶段。
+- **第 4 节的变化只在报告给出基准日时写**，写的时候带上基准日（"较 11-05 升 54 名"）。「首次进榜」只能照
+  报告的明确标注写；没有标注的只能写"较 X 日新进前 100"。
+- **口径红线**（报告开头也列了，写之前再读一遍）：
+  - 排名不是收入。不写月入、营收、"赚了多少"；畅销榜第 6 就写"畅销榜第 6"。
+  - 评分/天是下载量的粗代理。写成"评分 X 条、日均 Y 条"，不写成下载量或用户数。
+  - 不在榜 ≠ 没上架 ≠ 市场空。不写"X 国还没人做"。第 6 节的「几乎没人做」「零星」只说明名字匹配的 App
+    少，不要写成"市场空""没有竞争"。
+  - 名称主题是程序按 App 名分词聚出来的，同一个词下可能是两类东西（"stories" 下既有 AI 角色聊天也有
+    短剧）。写之前看一眼例子，品类不一致就别并成一条。
+  - 娱乐类里混着挂在娱乐分类下的手游（如"复古传奇"），不当作 App 信号写。
+- **7 天去重**：grep 过去 7 天 summary.md 里的 App 名和主题词。写过的只在出现新信号时再写（新进一个国家、
+  名次升 20 以上、主题多出新开发商），并点明变化。
+- **数字照抄报告**：名次、评分数、天数、国家一律从报告复制，不自己重算。名次写「第 6 名」，不写 `#6`
+  （见 step 7 的 Obsidian tag 规则）。
+
 #### 播客源处理原则（20VC / Dwarkesh / Latent Space / Sharp Tech / OnBoard! 等）
 - **默认归类**：播客条目归入 Section A（HN/其他网站）。但若本期主题明显是某篇论文或某个 GitHub 项目的讨论，可归 Section B。
 - **展开时必须打开 show notes**：播客 RSS 的 title 通常只写主持人 + 嘉宾，看不出本期实际讨论了什么。要展开写，必须 WebFetch episode URL 或 summary 字段，抽出 3-5 个本期关键话题点。纯标题复述（如"20VC：Harry 采访 XXX"）零信息增量，宁可省略。
@@ -378,6 +419,8 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
   - 当天 `article-harvest query archive --on YYYY-MM-DD --json` 的完整输出（ground truth）
   - 过去 7 天 `assets/YYYY-MM-*/summary.md` 路径清单
   - 四个分类文件路径
+  - 当天 `modules/app-radar/data/reports/YYYY-MM-DD.json`（「App 榜单信号」的 ground truth；summary 没写这块
+    就不用给）
 - 要求 subagent 独立 WebFetch 可疑 URL（**不得复用主 agent 的结论**），对每条事实断言分类：
   - `[OK]` — harvest 或独立 WebFetch 可验证
   - `[FIX]` — 有错但有正确版本，给出替换文本
@@ -391,6 +434,8 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - Section B 的论文部分是否全部来自 hf-papers 的 `has_content: true` 条目
 - 「上游动态」里来自 `*-rfcs` 的内容是否被写成了已发布（应为预告 / 计划 / 测试中）；版本号与功能的对应是否出自 release notes 原文
 - 每条"Apr X 已报道"的去重标注在对应 summary 里能否 grep 到实体
+- 「App 榜单信号」的名次、评分数、天数、国家与报告 JSON 一致；没有把排名写成收入、把评分写成下载量，
+  没有在报告未标注时写「首次进榜」
 - WebFetch 未命中却出现超越标题/RSS summary 的细节
 - **合力（synthesis）密度审查**：每个 Section 是否至少有 1 个 thesis 段落（把 3+ 条相关条目熔成一个论点的合力判断），还是仅由独立条目段落 / bullet 列表组成？若一个 Section 全部为独立条目而无 thesis，标记为**结构性问题**（非事实错误，但写作质量回退到"流水账"），在收尾报告中提示，下期写作前重读本规则。
 
@@ -446,6 +491,7 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - 返回生成的文件路径清单（含 Obsidian 同步路径），并说明是否发生去重与被移除的标题。
 - 附上 fact-check 轮次结果摘要（`[FIX]`/`[DROP]`/`[DEDUP-ERROR]` 条数）。
 - 主题台账本期追加条数（0 条也写明）。
+- 「App 榜单信号」是否写入；省略时写明原因（报告缺失 / 没有够格的信号 / 7 天内已写过）。
 
 ## Assets
 - 仓库根目录 `assets/` 用于保存每日输出文件夹（YYYY-MM-DD），已加入 `.gitignore`。

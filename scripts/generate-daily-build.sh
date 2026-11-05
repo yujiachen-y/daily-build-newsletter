@@ -16,10 +16,17 @@ export PATH="$HOME/.local/bin:$PATH"
 
 cd "$REPO" || { echo "!! repo not found: $REPO"; exit 1; }
 
+DAY="$(date +%F)"
+
 echo "=== $(date '+%F %T') daily-build start ==="
 rc=0
+# App 榜单快照与供给阶段（modules/app-radar，供 Section A 的「App 榜单信号」）：免费，通常 3–5 分钟，
+# 供给搜索缓存过期那天约 15 分钟。
+# 钥匙串里有 dataxapi-api-key 时顺带拉国内指数（付费，每个词 7 天最多拉一次）。失败不阻断日报。
+DATAXAPI_API_KEY="${DATAXAPI_API_KEY:-$(security find-generic-password -s dataxapi-api-key -w 2>/dev/null)}" \
+  app-radar run --date "$DAY" || echo "!! app-radar failed (rc=$?), continuing without it"
 omp -p --auto-approve --advisor --max-time 3600 \
-  "使用本仓库的 daily-article-generator 技能，按 SKILL.md 的完整流程生成今天（$(date +%F)）的日报：检查并 ingest、7 天去重、分类落盘、summary.md（含三条长度自检）、事实审查、主题台账、Obsidian 同步，最后按 step 12 输出收尾报告。SUBSTACK_SID 取不到或 rfcs 源缺 GITHUB_TOKEN 时按 SKILL.md 的降级规则继续，不要中断。" \
+  "使用本仓库的 daily-article-generator 技能，按 SKILL.md 的完整流程生成今天（$DAY）的日报：检查并 ingest、7 天去重、分类落盘、summary.md（含三条长度自检）、事实审查、主题台账、Obsidian 同步，最后按 step 12 输出收尾报告。SUBSTACK_SID 取不到或 rfcs 源缺 GITHUB_TOKEN 时按 SKILL.md 的降级规则继续，不要中断。" \
   || rc=$?
 echo "=== $(date '+%F %T') daily-build exit $rc ==="
 exit $rc
