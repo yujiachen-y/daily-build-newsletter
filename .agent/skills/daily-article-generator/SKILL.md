@@ -27,7 +27,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - 若重试后依然失败，停止生成日报：
   - 查看 `modules/article-harvest/data/runs/` 的最新 run 记录或 CLI 报错信息，定位问题。
   - 向用户说明问题原因与可能修复方向，并询问是否需要修复。
-- **App 榜单报告**：检查 `modules/app-radar/data/reports/YYYY-MM-DD.md` 是否存在（定时脚本在 omp 之前
+- **App 榜单报告**：检查 `modules/app-radar/data/reports/YYYY-MM-DD.md` 是否存在（定时脚本在启动 agent 之前
   已跑过 `app-radar run`）。不存在就执行
   `DATAXAPI_API_KEY="${DATAXAPI_API_KEY:-$(security find-generic-password -s dataxapi-api-key -w 2>/dev/null)}" app-radar run --date YYYY-MM-DD`
   （通常 3–5 分钟；供给搜索的缓存过期那天约 15 分钟）。它失败不阻断日报：step 8 的「App 榜单信号」整块省略，
@@ -500,7 +500,7 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 
 完成后在收尾报告中给出 Obsidian 路径，确认 iCloud 同步路径已更新。
 
-定时脚本 `scripts/generate-daily-build.sh` 在 omp 退出后会检查当天的 `YYYY-MM-DD.md`。如果它不存在而
+定时脚本 `scripts/generate-daily-build.sh` 在 agent 退出后会检查当天的 `YYYY-MM-DD.md`。如果它不存在而
 `summary.md` 已经写好，脚本会在开头加一行「未经事实审查」，然后把 summary.md 复制到这两个位置。这只是兜底，
 不能代替本步骤。
 
