@@ -125,10 +125,37 @@ else
   (( $(date +%H) >= 8 )) && echo "!! fresh run after UTC midnight; tomorrow's ingest will share this UTC date"
 fi
 
+# 认证：11-14、11-15 两天 claude.ai 登录先被拦、后到期刷新失败，preflight 连挂两次，日报停了一周没人发现。
+# 优先用 `claude setup-token` 生成的长期 token（钥匙串 claude-code-oauth-token）；没有就用已保存的登录，
+# 到期前 7 天弹通知。token 等两个 radar 跑完才 export，只有 claude 进程树拿得到。
+if [[ -z "${DAILY_BUILD_DRY_RUN:-}" ]]; then
+  if CLAUDE_TOKEN="$(security find-generic-password -s claude-code-oauth-token -w 2>/dev/null)" \
+      && [[ -n "$CLAUDE_TOKEN" ]]; then
+    export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_TOKEN"
+    echo "=== auth: long-lived token from keychain ==="
+  else
+    days_left="$(claude auth status 2>/dev/null | python3 -I -c '
+import json, sys
+from datetime import datetime, timezone
+try:
+    end = json.load(sys.stdin).get("loginExpiresAt")
+    print((datetime.fromisoformat(end.replace("Z", "+00:00")) - datetime.now(timezone.utc)).days)
+except Exception:
+    print("?")
+')"
+    echo "=== auth: saved claude.ai login, ${days_left} days left ==="
+    if [[ "$days_left" == "?" ]] || (( days_left < 7 )); then
+      notify "Claude 登录 ${days_left} 天后到期：运行 claude setup-token 并存进钥匙串 claude-code-oauth-token"
+    fi
+  fi
+  unset CLAUDE_TOKEN
+fi
+
 # 无人值守没人批权限弹窗，用 bypassPermissions（与之前 omp --auto-approve 等价）。
 # 代价：抓来的网页若藏着 prompt injection，能直接执行命令。
-# 模型与 effort 暂定 opus + high，等对比测试再调；stream 里的 result 事件记录耗时和 token 用量。
-# 11-07 实测一整轮（两天素材）约占 5 小时额度窗口的 81%。
+# 模型 opus（11-23 实测解析为 claude-opus-5-5，subagent 同样），effort 11-23 起从 high 改成 xhigh。
+# stream 里的 result 事件记录耗时和 token 用量。11-07 实测一整轮（两天素材、high）约占 5 小时额度窗口的 81%，
+# xhigh 更费额度；撞上限时 12:05 那轮会 --resume 续跑。
 # 11-06 首轮卡在启动阶段（90 分钟没写出会话记录，被 timeout 杀掉），白天在 launchd 下复现不了。
 # 先用 2 分钟上限的小请求把认证、hook、MCP 启动走一遍，卡住重试一次；两次都失败就不跑正式流程。
 preflight() {
@@ -139,7 +166,7 @@ if preflight 1 || { sleep 60; preflight 2; }; then
   # stream-json 边跑边落盘，卡住时能看到停在哪一步；debug 日志记录启动阶段。
   CLAUDE_STREAM="$LOG_DIR/$DAY.claude-$ATTEMPT.jsonl"
   timeout --kill-after=60 5400 "${CLAUDE[@]}" -p "${MODE[@]}" \
-    --model opus --effort high --permission-mode bypassPermissions \
+    --model opus --effort xhigh --permission-mode bypassPermissions \
     --output-format stream-json --verbose --debug-file "$LOG_DIR/$DAY.claude-$ATTEMPT-debug.log" \
     "$PROMPT" < /dev/null > "$CLAUDE_STREAM" || rc=$?
   echo "=== $(date '+%F %T') claude exit $rc ==="
