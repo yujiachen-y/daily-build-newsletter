@@ -12,6 +12,13 @@ A local-first toolkit for harvesting articles from tech news sources, blogs, and
 
 Data is stored as flat files (JSON + Markdown) under a local `data/` directory (git-ignored). An optional SQLite index enables faster queries.
 
+**Market signals** supplement the daily newsletter:
+
+- [App Radar](modules/app-radar/README.md) tracks App Store charts and supply signals.
+- [Plugin Radar](modules/plugin-radar/README.md) tracks which agent plugins and skills are being
+  installed faster (skills.sh, SkillHub, ClawHub, official Claude Code / Codex / ZCode / Kimi
+  catalogs) and screens install counts against GitHub to filter out install farming.
+
 ## Quick Start
 
 ```bash
@@ -46,6 +53,8 @@ daily-build-newsletter/
 │   ├── src/article_harvest/     #   Implementation
 │   ├── tests/                   #   pytest test suite
 │   └── data/                    #   Local run artifacts (git-ignored)
+├── modules/app-radar/            # App Store chart signals
+├── modules/plugin-radar/         # Agent plugin and skill heat signals
 ├── editorial_workspace/         # Newsletter drafts (YYYY-MM-DD-*.md)
 ├── docs/                        # Reports and analysis
 └── scripts/                     # Repo-level utilities

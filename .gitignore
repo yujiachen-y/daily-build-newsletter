@@ -5,6 +5,7 @@
 
 modules/article-harvest/data/
 modules/app-radar/data/
+modules/plugin-radar/data/
 modules/article-harvest/.coverage
 assets/
 
