@@ -6,8 +6,6 @@ from .aggregations.hf_papers import source as hf_papers_source
 from .aggregations.hn import source as hn_source
 from .aggregations.lobsters import source as lobsters_source
 from .aggregations.product_hunt import source as product_hunt_source
-from .aggregations.skills_sh import source_hot as skills_sh_hot_source
-from .aggregations.skills_sh import source_trending as skills_sh_trending_source
 from .blogs.addy_osmani import source as addy_osmani_source
 from .blogs.ahead_of_ai import source as ahead_of_ai_source
 from .blogs.ai_native_dev import source as ai_native_dev_source
@@ -107,8 +105,8 @@ _SOURCES: list[Source] = [
     hf_papers_source(),
     github_trending_source(),
     product_hunt_source(),
-    skills_sh_trending_source(),
-    skills_sh_hot_source(),
+    # skills-sh trending/hot: disabled 2026-11-22 — raw top-30 lists, about 38% install
+    # farming on 2026-11-22; modules/plugin-radar covers skills.sh with GitHub-star filtering
     zero_one_me_source(),
     antirez_source(),
     ben_evans_source(),
