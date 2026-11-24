@@ -88,6 +88,13 @@ if [[ ! -f "$REPO/modules/app-radar/data/reports/$DAY.md" ]]; then
     app-radar run --date "$DAY" || echo "!! app-radar failed (rc=$?), continuing without it"
 fi
 
+# 插件与技能热度（modules/plugin-radar，供 Section A 的「插件与技能热度」）：免费，约 2 分钟。
+# GITHUB_TOKEN 只用来查星数、过滤刷量；取不到时只核对前 40 个仓库。失败不阻断日报。
+if [[ ! -f "$REPO/modules/plugin-radar/data/reports/$DAY.md" ]]; then
+  GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token --user yujiachen-y 2>/dev/null)}" \
+    plugin-radar run --date "$DAY" || echo "!! plugin-radar failed (rc=$?), continuing without it"
+fi
+
 # 上一轮留下的会话：取当天最新一个带 session_id 的 stream 文件。
 streams=("$LOG_DIR/$DAY".claude*.jsonl(Nom))  # 按修改时间从新到旧，没有匹配时为空
 SESSION_ID="$(print -rl -- $streams | python3 -I -c '

@@ -14,7 +14,7 @@ description: Generate a daily article digest/newsletter by checking article-harv
 - 确认当前工作目录是仓库根目录。
 - 识别“今天”的日期（YYYY-MM-DD，本地时区），后续所有路径使用该日期。
 - 若 `article-harvest` CLI 不可用，先按 `modules/article-harvest/README.md` 的 Quick Start 安装依赖。
-  `app-radar` CLI 同理，见 `modules/app-radar/README.md`。
+  `app-radar` 和 `plugin-radar` CLI 同理，见各自模块的 README。
 
 ### 2) 检查今日文章与爬取
 - 进入 `modules/article-harvest/` 目录。
@@ -31,6 +31,11 @@ description: Generate a daily article digest/newsletter by checking article-harv
   已跑过 `app-radar run`）。不存在就执行
   `DATAXAPI_API_KEY="${DATAXAPI_API_KEY:-$(security find-generic-password -s dataxapi-api-key -w 2>/dev/null)}" app-radar run --date YYYY-MM-DD`
   （通常 3–5 分钟；供给搜索的缓存过期那天约 15 分钟）。它失败不阻断日报：step 8 的「App 榜单信号」整块省略，
+  收尾报告提一句。
+- **插件与技能热度报告**：检查 `modules/plugin-radar/data/reports/YYYY-MM-DD.md` 是否存在（定时脚本可能
+  已跑过）。不存在就执行
+  `GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token --user yujiachen-y)}" plugin-radar run --date YYYY-MM-DD`
+  （约 2 分钟，要联网；token 只用来查 GitHub 星数）。它失败不阻断日报：step 8 的「插件与技能热度」整块省略，
   收尾报告提一句。
 
 ### 3) 收集标题与元信息
@@ -284,6 +289,39 @@ EOF
 - **数字照抄报告**：名次、评分数、天数、国家一律从报告复制，不自己重算。名次写「第 6 名」，不写 `#6`
   （见 step 7 的 Obsidian tag 规则）。
 
+#### 插件与技能热度（Section A 末尾，「App 榜单信号」之后）
+
+数据不来自 article-harvest，来自 `modules/plugin-radar`：每天抓 skills.sh（跨 Agent 的 `npx skills` 安装
+遥测）、SkillHub（WorkBuddy 技能市场里的 SkillHub 页签）和 ClawHub（OpenClaw）的计数，Claude Code / Codex /
+ZCode 官方市场在 GitHub 上的目录历史，以及 Kimi 插件介绍页。报告在
+`modules/plugin-radar/data/reports/YYYY-MM-DD.md`，第 1 节是能写的信号，句子里的数字已经算好；同名 `.json`
+是机器可读版。这块盯的是「开发者在装什么、比之前多装了多少」：HN 和 GitHub Trending 只看得到仓库，看不到
+安装量。
+
+- **位置与篇幅**：Section A 末尾、「App 榜单信号」之后（没有 App 块就接在「资本与交易」之后），起加粗行
+  `**插件与技能热度**`（加粗而非 heading）。写 1 段，最多再跟 2 条 bullet，计入 step 8 的行数和字数上限。
+  报告缺失，或第 1 节没有够格的信号时，整块省略，不写占位句。
+- **直接写信号**：从报告 1.1–1.3（skills.sh 上升、周加速、新冒头）和 1.5（官方市场上新）里挑数字最大的
+  1–2 条，段落开头就是技能名和数字。不写「这一周安装加速最明显的两个技能都出自项目官方」这类概括句。
+- **写清它是什么**：报告只有名字和数字。写之前打开报告给的 skills.sh 链接或源仓库 README，用半句话说清
+  这个技能/插件让 agent 做什么。只写名字和倍数，读者看不懂。
+- **数字照抄报告**：日均、倍数、周区间、累计、星数一律从报告复制，不自己重算。句子里带上对照基准，例如
+  「最近 6.7 天日均安装 719 次，是此前日均的 1.2 倍」「11-09 至 11-15 这一周安装 8.8 万次，是前四周平均的
+  18.9 倍」。周数据写清是哪一周，不写「本周」。
+- **口径红线**（报告第 4 节也列了，写之前再读一遍）：
+  - 安装次数不是用户数，写「安装 X 次」。skills.sh 只统计 `npx skills` CLI，不含各家原生插件市场里的安装。
+  - 报告排除的「疑似刷量」「无法核对」条目不写成热度；刷量比例、冲榜仓库也不写进日报（报告把它们放在
+    第 2 节明细表）。11-22、11-23 连续两天出现同一句「N% 来自安装量与 GitHub 关注度严重不符的仓库」，
+    用户嫌重复：它是过滤器，不是新闻。
+  - 官方目录上架是事实，不是热度。Codex、ZCode、Kimi、豆包没有公开的单个插件热度数字，不写「X 平台上最
+    热的插件」。
+  - Claude Code 的安装数文件已停更（报告写了生成日期），不能拿它写近期增长。
+  - SkillHub 的下载量可能含客户端自动下载，只写报告没标「收藏极少」的条目，并写成「下载」。
+- **7 天去重**：grep 过去 7 天 summary.md 里的技能名、仓库名和插件名。写过的只在出现新信号时再写（倍数
+  明显再升、上了新的官方目录），并点明变化。周加速的数据一周才更新一次，同一周的条目只写一次。
+- **元信息不进日报**：来源状态、覆盖范围、「首次抓取」「没有变化」「采集失败」只写进 step 12 的收尾报告，
+  开头 Summary 也不提这块的运行情况。
+
 #### 播客源处理原则（20VC / Dwarkesh / Latent Space / Sharp Tech / OnBoard! 等）
 - **默认归类**：播客条目归入 Section A（HN/其他网站）。但若本期主题明显是某篇论文或某个 GitHub 项目的讨论，可归 Section B。
 - **展开时必须打开 show notes**：播客 RSS 的 title 通常只写主持人 + 嘉宾，看不出本期实际讨论了什么。要展开写，必须 WebFetch episode URL 或 summary 字段，抽出 3-5 个本期关键话题点。纯标题复述（如"20VC：Harry 采访 XXX"）零信息增量，宁可省略。
@@ -421,6 +459,8 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
   - 四个分类文件路径
   - 当天 `modules/app-radar/data/reports/YYYY-MM-DD.json`（「App 榜单信号」的 ground truth；summary 没写这块
     就不用给）
+  - 当天 `modules/plugin-radar/data/reports/YYYY-MM-DD.json`（「插件与技能热度」的数字 ground truth；summary
+    没写这块就不用给）。技能/插件「是做什么的」那半句，要独立打开 skills.sh 页面或源仓库 README 核对。
 - 要求 subagent 独立 WebFetch 可疑 URL（**不得复用主 agent 的结论**），对每条事实断言分类：
   - `[OK]` — harvest 或独立 WebFetch 可验证
   - `[FIX]` — 有错但有正确版本，给出替换文本
@@ -446,6 +486,8 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - 每条"Apr X 已报道"的去重标注在对应 summary 里能否 grep 到实体
 - 「App 榜单信号」的名次、评分数、天数、国家与报告 JSON 一致；没有把排名写成收入、把评分写成下载量，
   没有在报告未标注时写「首次进榜」
+- 「插件与技能热度」的日均、倍数、周区间、累计、星数与报告 JSON 一致；没有把安装写成用户数，没有把报告
+  排除的条目或官方目录上架写成热度
 - WebFetch 未命中却出现超越标题/RSS summary 的细节
 - **合力（synthesis）密度审查**：每个 Section 是否至少有 1 个 thesis 段落（把 3+ 条相关条目熔成一个论点的合力判断），还是仅由独立条目段落 / bullet 列表组成？若一个 Section 全部为独立条目而无 thesis，标记为**结构性问题**（非事实错误，但写作质量回退到"流水账"），在收尾报告中提示，下期写作前重读本规则。
 
@@ -509,6 +551,8 @@ summary.md 初稿完成后、收尾之前，**必须**跑一轮事实性审查�
 - 附上 fact-check 轮次结果摘要（`[FIX]`/`[DROP]`/`[DEDUP-ERROR]` 条数）。
 - 主题台账本期追加条数（0 条也写明）。
 - 「App 榜单信号」是否写入；省略时写明原因（报告缺失 / 没有够格的信号 / 7 天内已写过）。
+- 「插件与技能热度」是否写入；省略时写明原因（报告缺失 / 没有够格的信号 / 7 天内已写过）。报告第 3 节里
+  状态不是 `ok` 的来源逐个列出。
 
 ## Assets
 - 仓库根目录 `assets/` 用于保存每日输出文件夹（YYYY-MM-DD），已加入 `.gitignore`。
